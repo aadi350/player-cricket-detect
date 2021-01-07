@@ -1,10 +1,10 @@
 import tensorflow as tf
-import re
+import re, os
 import logging
 from logging import FileHandler, DEBUG
 
 # CONSTANTS
-frames_path = '/media/aadi/Library1/python-projects/sahil_videos'
+frames_path = '/media/aadi/Library1/_assets/video/sahil_videos'
 
 
 # UTILITY FUNCTIONS
@@ -60,4 +60,6 @@ def config_session_tf(allow_growth=True, per_process_gpu_memory_fraction=0.8):
 
 
 if __name__ == '__main__':
+    for i in os.listdir(frames_path):
+        print(i)
     print('utility function')

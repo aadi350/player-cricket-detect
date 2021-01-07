@@ -14,7 +14,7 @@ def numerical_sort(value):
     parts[1::2] = map(int, parts[1::2])
     return parts
 
-video_path = 'D:\python-projects\sahil_videos'
+video_path = '/media/aadi/Library1/_assets/video/sahil_videos'
 
 def extract_frames(path):
     print(path)

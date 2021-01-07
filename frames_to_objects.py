@@ -23,7 +23,7 @@ tf.compat.v1.disable_eager_execution()
 def init_detector():
     detector = ObjectDetection()
     detector.setModelTypeAsYOLOv3()
-    detector.setModelPath('/media/aadi/Library1/python-projects/cricket-player-detect/models/yolo.h5')
+    detector.setModelPath('/media/aadi/Library1/_projects/cricket-player-detect/models/yolo.h5')
     detector.loadModel()
 
     custom_objects = detector.CustomObjects(person=True)
@@ -68,8 +68,9 @@ if __name__ == '__main__':
     time_taken = []
     detector, custom_objects = init_detector()
 
-    BALL_NUM_RANGE = [i for i in range(40, 42)]
+    BALL_NUM_RANGE = [i for i in range(42, 43)]
     print(BALL_NUM_RANGE)
+
     for i, file in enumerate(sorted(os.listdir(frames_path), key=numerical_sort)):
         try:
             if split_frame_name_ball(file) in BALL_NUM_RANGE:

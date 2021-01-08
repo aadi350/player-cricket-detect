@@ -2,11 +2,12 @@ import os
 import re
 import cv2 as cv
 import tensorflow as tf
-from imageai.Detection import ObjectDetection
+import logging
 
-print(tf.__version__)
+logging.debug(tf.__version__)
 numbers = re.compile(r'(\d+)')
 tf.compat.v1.disable_eager_execution()
+video_path = None
 
 
 def numerical_sort(value):
@@ -14,30 +15,43 @@ def numerical_sort(value):
     parts[1::2] = map(int, parts[1::2])
     return parts
 
-video_path = '/media/aadi/Library1/_assets/video/sahil_videos'
 
-def extract_frames(path):
+def extract_single_video(path):
     print(path)
     vid = cv.VideoCapture(path)
-    frames_path = os.path.join(video_path, 'frames')
-    # os.mkdir(frames_path)
-    print(frames_path)
-    i = 0
+    frames_path = os.path.join(video_path, os.path.basename(path)).split('.')[0]
+    if not os.path.exists(frames_path):
+        os.mkdir(frames_path)
+
+    logging.debug('frames_path: {}'.format(frames_path))
+    frame_num = 0
     while True:
         success, frame = vid.read()
         if not success:
-            print('fail: {}'.format(i))
+            print('fail: {}'.format(frame_num))
             break
-        temp_name = os.path.join(path.split('.')[0] + '_f' + str(i) + '.jpg')
+        temp_name = os.path.join(frames_path, os.path.basename(path).split('.')[0] + '_f' + str(frame_num) + '.jpg')
         cv.imwrite(temp_name, frame)
-        i += 1
-
+        frame_num += 1
     vid.release()
     return
 
 
-for file in sorted(os.listdir(video_path), key=numerical_sort):
-    print(file)
-    if file.endswith('.mp4'):
-        extract_frames(os.path.join(video_path, file))
+def get_file_path():
+    paths = {
+        "Windows": "D:/_assets/video/sahil_videos",
+        "Linux": "/media/aadi/Library1/_assets/video/sahil_videos"
+    }
+    import platform
+    return paths.get(platform.system())
+
+
+def main():
+    for file in sorted(os.listdir(video_path), key=numerical_sort):
+        if file.endswith('.mp4'):
+            extract_single_video(os.path.join(video_path, file))
+
+
+if __name__ == '__main__':
+    video_path = get_file_path()
 

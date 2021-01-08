@@ -47,11 +47,11 @@ def get_file_path():
 
 
 def main():
+    video_path = get_file_path()
     for file in sorted(os.listdir(video_path), key=numerical_sort):
         if file.endswith('.mp4'):
             extract_single_video(os.path.join(video_path, file))
 
 
 if __name__ == '__main__':
-    video_path = get_file_path()
-
+    main()

@@ -81,7 +81,7 @@ x = data_augmentation(inputs)
 x = preprocess_input(x)
 x = base_model(x, training=False)
 x = global_average_layer(x)
-x = tf.keras.layers.Dropout(0.2)(x)
+x = tf.keras.layers.Dropout(0.3)(x)
 outputs = prediction_layer(x)
 model = tf.keras.Model(inputs, outputs)
 
@@ -94,6 +94,7 @@ model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
 hist = model.fit(
     train_ds,
     validation_data=val_ds,
-    epochs=3
+    epochs=10
 )
 
+model.save('./very_small.h5')

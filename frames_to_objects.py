@@ -3,6 +3,7 @@ import tensorflow as tf
 import logging
 import psutil
 import gc
+import numpy as np
 from imageai.Detection import ObjectDetection
 from logging import info, debug, warning, error
 from os.path import join
@@ -20,23 +21,37 @@ tf.compat.v1.keras.backend.set_session(config_session_tf())
 tf.compat.v1.disable_eager_execution()
 
 
+
 def init_detector():
     detector = ObjectDetection()
     detector.setModelTypeAsYOLOv3()
-    detector.setModelPath('/media/aadi/Library1/_projects/cricket-player-detect/models/yolo.h5')
+    detector.setModelPath('D:/_assets/models/yolo.h5')
     detector.loadModel()
-
     custom_objects = detector.CustomObjects(person=True)
 
     return detector, custom_objects
 
-
 DETECT = init_detector()
 
 
-def get_objects_per_frame(frame, output_path=None, detect=DETECT, ):
+def get_objects_per_frame(frame, output_path=None, detect=DETECT):
+    output_image_path = join(frames_path.split('.')[0], frame) if output_path else None
+    input_image = frame
+    detector, custom_objects = detect
+
+    detections, objects = detector.detectCustomObjectsFromImage(
+        custom_objects=custom_objects,
+        input_image=input_image,
+        minimum_percentage_probability=30,
+        extract_detected_objects=False
+    )
+
+    return detections, objects
+
+
+def get_objects_per_frame_path(frame, output_path=None, detect=DETECT, ):
     start = perf_counter()
-    output_image_path = output_path if output_path else join(frames_path.split('.')[0], frame)
+    output_image_path = join(frames_path.split('.')[0], frame) if output_path else None
     input_image_path = join(frames_path, frame)
 
     info('output_image_path: {}'.format(output_image_path))
@@ -57,7 +72,6 @@ def get_objects_per_frame(frame, output_path=None, detect=DETECT, ):
         psutil.cpu_percent(),
         perf_counter() - start
     ))
-    # info('file: {}, detect: {}'.format(frame, len(detections)))
 
     gc.collect()
     return detections, objects
@@ -76,7 +90,7 @@ if __name__ == '__main__':
             if split_frame_name_ball(file) in BALL_NUM_RANGE:
                 print('i: {}, file: {}'.format(i, os.fsdecode(file)))
                 try:
-                    get_objects_per_frame(
+                    get_objects_per_frame_path(
                         os.fsdecode(file),
                         detect=(detector, custom_objects))
                 except Exception as e:

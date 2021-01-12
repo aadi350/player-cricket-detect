@@ -15,7 +15,7 @@ if gpus:
         print(e)
 
 # Parameter Inputs
-DATA_DIR = "D:\\_assets\\video\\sahil_categories"
+DATA_DIR = "/media/aadi/Library1/_assets/video/sahil_categories"
 AUTOTUNE = tf.data.AUTOTUNE
 NUM_CLASSES = 2
 BATCH_SIZE = 32
@@ -27,6 +27,7 @@ VALIDATION_SPLIT = 0.2
 LABEL_MODE = 'categorical'
 COLOR_MODE = 'rgb'
 SEED = 42
+EPOCHS = 0
 
 # Image Dataset Generation
 train_ds = image_dataset_from_directory(
@@ -72,7 +73,7 @@ feature_batch = base_model(image_batch)
 
 global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
 feature_batch_average = global_average_layer(feature_batch)
-prediction_layer = tf.keras.layers.Dense(NUM_CLASSES)
+prediction_layer = tf.keras.layers.Dense(NUM_CLASSES, activation='sigmoid')
 prediction_batch = prediction_layer(feature_batch_average)
 
 # Model definition
@@ -88,13 +89,13 @@ model = tf.keras.Model(inputs, outputs)
 
 base_learning_rate = 0.0001
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
-              loss=tf.keras.losses.CategoricalCrossentropy(from_logits=True),
-              metrics=['accuracy'])
+              loss='categorical_crossentropy',
+              metrics=['categorical_accuracy'])
 
 hist = model.fit(
     train_ds,
     validation_data=val_ds,
-    epochs=10
+    epochs=EPOCHS
 )
 
 model.save('./very_small.h5')

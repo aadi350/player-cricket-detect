@@ -1,7 +1,6 @@
 import os
 import tensorflow as tf
 import logging
-import psutil
 import gc
 import numpy as np
 from imageai.Detection import ObjectDetection

@@ -6,13 +6,19 @@ import numpy as np
 import tensorflow as tf
 from PIL import Image
 from util import numerical_sort
-CAT_PATH = 'D:/_assets/img/sahil_frames'
+
+CAT_PATH = '/media/aadi/Library1/_assets/img/sahil_frames'
+BATSMAN_CAT_PATH = '/media/aadi/Library1/_assets/video/sahil_categories/others'
 
 
 def _process_path(fname):
     img_str = tf.io.read_file(fname)
     img = tf.image.decode_jpeg(img_str, channels=3)
     return img
+
+
+def load_video_frames_batsman(path=BATSMAN_CAT_PATH, num_frames=None):
+    return load_video_frames(path, num_frames)
 
 
 def load_video_frames(path=CAT_PATH, num_frames=None):
@@ -24,10 +30,9 @@ def load_video_frames(path=CAT_PATH, num_frames=None):
         for i, file in enumerate(sorted(os.listdir(path), key=numerical_sort)):
             if file.endswith('.jpg'):
                 logging.debug(os.path.join(path, file))
-                
+
                 full_path = os.path.join(path, file)
                 frame = np.asarray(Image.open(full_path))
-                print(type(frame))
                 frame_list.append(frame)
                 frame_names.append(str(file))
                 frame_dict[str(file)] = frame
@@ -39,4 +44,4 @@ def load_video_frames(path=CAT_PATH, num_frames=None):
         logging.error('Video read fail')
 
 
-load_video_frames(num_frames=5)
+load_video_frames_batsman(num_frames=5)

@@ -2,7 +2,8 @@ import tempfile
 from urllib.request import urlopen
 import numpy as np
 import tensorflow as tf
-import re, os
+import re
+import os
 import logging
 from logging import FileHandler, DEBUG
 import matplotlib.pyplot as plt
@@ -22,6 +23,15 @@ def numerical_sort(value):
     return parts
 
 
+def get_file_path_prefix():
+    paths = {
+        "Windows": "D:/_assets",
+        "Linux": "/media/aadi/Library1/_assets"
+    }
+    import platform
+    return paths.get(platform.system())
+
+
 class DebugFileHandler(FileHandler):
     def __init__(self, filename, mode='a', encoding=None, delay=False):
         super().__init__(filename, mode, encoding, delay)
@@ -36,6 +46,13 @@ class DebugFileHandler(FileHandler):
     Visualization code adapted from TF object detection API
 """
 
+
+def load_img(path):
+    img = tf.io.read_file(path)
+    img = tf.image.decode_jpeg(img, channels=3)
+    return img
+
+
 def display_image(image):
     fig = plt.figure(figsize=(20, 15))
     plt.grid(False)
@@ -43,14 +60,14 @@ def display_image(image):
     plt.show()
 
 
-def download_and_resize_image(url, new_width=256, new_height=256,
-                              display=False):
+def download_and_resize_image(url, new_width=256, new_height=256, display=False):
     _, filename = tempfile.mkstemp(suffix=".jpg")
     response = urlopen(url)
     image_data = response.read()
     image_data = BytesIO(image_data)
     pil_image = Image.open(image_data)
-    pil_image = ImageOps.fit(pil_image, (new_width, new_height), Image.ANTIALIAS)
+    pil_image = ImageOps.fit(
+        pil_image, (new_width, new_height), Image.ANTIALIAS)
     pil_image_rgb = pil_image.convert("RGB")
     pil_image_rgb.save(filename, format="JPEG", quality=90)
     print("Image downloaded to %s." % filename)
@@ -141,7 +158,8 @@ def split_frame_name(filename):
         inning_num = stem.split('_')[1].replace('Inn', '')
         ball_num = stem.split('_')[0].replace('Ball', '').lstrip('0')
         frame_num = stem.split('f')[-1]
-        logging.debug('{}: {} {} {}'.format(filename, ball_num, inning_num, frame_num))
+        logging.debug('{}: {} {} {}'.format(
+            filename, ball_num, inning_num, frame_num))
         return int(ball_num), int(inning_num), int(frame_num)
     else:
         raise TypeError('Not image: {}'.format(filename))
@@ -168,6 +186,4 @@ def config_session_tf(allow_growth=True, per_process_gpu_memory_fraction=0.8):
 
 
 if __name__ == '__main__':
-    for i in os.listdir(frames_path):
-        print(i)
-    print('utility function')
+    raise NotImplementedError('utility function')

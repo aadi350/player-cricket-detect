@@ -21,7 +21,6 @@ tf.compat.v1.keras.backend.set_session(config_session_tf())
 tf.compat.v1.disable_eager_execution()
 
 
-
 def init_detector():
     detector = ObjectDetection()
     detector.setModelTypeAsYOLOv3()
@@ -31,11 +30,13 @@ def init_detector():
 
     return detector, custom_objects
 
+
 DETECT = init_detector()
 
 
 def get_objects_per_frame(frame, output_path=None, detect=DETECT):
-    output_image_path = join(frames_path.split('.')[0], frame) if output_path else None
+    output_image_path = join(frames_path.split(
+        '.')[0], frame) if output_path else None
     input_image = frame
     detector, custom_objects = detect
 
@@ -51,7 +52,8 @@ def get_objects_per_frame(frame, output_path=None, detect=DETECT):
 
 def get_objects_per_frame_path(frame, output_path=None, detect=DETECT, ):
     start = perf_counter()
-    output_image_path = join(frames_path.split('.')[0], frame) if output_path else None
+    output_image_path = join(frames_path.split(
+        '.')[0], frame) if output_path else None
     input_image_path = join(frames_path, frame)
 
     info('output_image_path: {}'.format(output_image_path))

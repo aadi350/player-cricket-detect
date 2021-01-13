@@ -14,8 +14,8 @@ OTHERS_CAT_PATH = '/media/aadi/Library1/_assets/video/sahil_categories/others'
 
 # Loads only cropped images from batsman data directory
 def load_video_frames_batsman(path=BATSMAN_CAT_PATH, num_frames=None):
-    return load_video_frames(path, num_frames)
-
+    res = load_video_frames(path, num_frames)
+    return res
 
 # Loads only cropped images from others data directory
 def load_video_frames_other(path=OTHERS_CAT_PATH, num_frames=None):
@@ -32,7 +32,6 @@ def load_video_frames(path=CAT_PATH, num_frames=None):
     try:
         for i, file in enumerate(sorted(os.listdir(path), key=numerical_sort)):
             if file.endswith('.jpg'):
-                logging.debug(os.path.join(path, file))
 
                 full_path = os.path.join(path, file)
                 frame = np.asarray(Image.open(full_path))
@@ -42,10 +41,9 @@ def load_video_frames(path=CAT_PATH, num_frames=None):
 
             if num_frames is not None:
                 if i >= num_frames - 1:
-                    logging.debug(type(frame_list))
                     return frame_list, frame_names
 
-        return np.asarray(frame_list, dtype=np.uint8), frame_dict.keys()
+        return frame_list, frame_names
     except ImportError:
         logging.error('Video read fail')
 

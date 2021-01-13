@@ -1,26 +1,29 @@
 import logging
 import os
-from six import BytesIO
-import PIL
 import numpy as np
-import tensorflow as tf
 from PIL import Image
-from util import numerical_sort
+from util import numerical_sort, _logger_dev
+
+root = logging.getLogger()
+_logger_dev(root)
 
 CAT_PATH = '/media/aadi/Library1/_assets/img/sahil_frames'
-BATSMAN_CAT_PATH = '/media/aadi/Library1/_assets/video/sahil_categories/others'
+BATSMAN_CAT_PATH = '/media/aadi/Library1/_assets/video/sahil_categories/batsman'
+OTHERS_CAT_PATH = '/media/aadi/Library1/_assets/video/sahil_categories/others'
 
 
-def _process_path(fname):
-    img_str = tf.io.read_file(fname)
-    img = tf.image.decode_jpeg(img_str, channels=3)
-    return img
-
-
+# Loads only cropped images from batsman data directory
 def load_video_frames_batsman(path=BATSMAN_CAT_PATH, num_frames=None):
     return load_video_frames(path, num_frames)
 
 
+# Loads only cropped images from others data directory
+def load_video_frames_other(path=OTHERS_CAT_PATH, num_frames=None):
+    return load_video_frames(path, num_frames)
+
+
+# Loads uncropped from all video frames
+# Returns array of frames and array of frame names
 def load_video_frames(path=CAT_PATH, num_frames=None):
     frame_list = []
     frame_names = []
@@ -36,12 +39,16 @@ def load_video_frames(path=CAT_PATH, num_frames=None):
                 frame_list.append(frame)
                 frame_names.append(str(file))
                 frame_dict[str(file)] = frame
+
             if num_frames is not None:
                 if i >= num_frames - 1:
+                    logging.debug(type(frame_list))
                     return frame_list, frame_names
+
         return np.asarray(frame_list, dtype=np.uint8), frame_dict.keys()
     except ImportError:
         logging.error('Video read fail')
 
 
-load_video_frames_batsman(num_frames=5)
+if __name__ == '__main__':
+    raise NotImplementedError

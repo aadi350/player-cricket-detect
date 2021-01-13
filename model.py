@@ -1,6 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation, Resizing
+from tensorflow.keras.layers import Flatten
+import numpy as np
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
@@ -27,7 +29,7 @@ VALIDATION_SPLIT = 0.4
 LABEL_MODE = 'categorical'
 COLOR_MODE = 'rgb'
 SEED = 42
-EPOCHS = 1
+EPOCHS = 15
 
 # Image Dataset Generation
 train_ds = image_dataset_from_directory(
@@ -74,6 +76,7 @@ resize_layer = Resizing(224, 224, name='resize')
 
 global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
 feature_batch_average = global_average_layer(feature_batch)
+flatten_layer = Flatten()
 prediction_layer = tf.keras.layers.Dense(NUM_CLASSES, activation='sigmoid')
 prediction_batch = prediction_layer(feature_batch_average)
 
@@ -81,22 +84,24 @@ prediction_batch = prediction_layer(feature_batch_average)
 inputs = tf.keras.Input(shape=(None, None, 3))
 x = resize_layer(inputs)
 x = data_augmentation(x)
+
 x = preprocess_input(x)
 x = base_model(x, training=False)
 x = global_average_layer(x)
 x = prediction_layer(x)
 outputs = tf.keras.layers.Dropout(0.3)(x)
-model = tf.keras.Model(inputs, outputs)
+model = tf.keras.Model(inputs, x)
 
 base_learning_rate = 0.0001
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
               loss='categorical_crossentropy',
               metrics=['categorical_accuracy'])
 
+print(model.summary())
+
 hist = model.fit(
     train_ds,
     validation_data=val_ds,
+    steps_per_epoch=2,
     epochs=EPOCHS
 )
-
-model.save('./very_small.h5')

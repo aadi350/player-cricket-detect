@@ -3,11 +3,9 @@ from urllib.request import urlopen
 import numpy as np
 import tensorflow as tf
 import re
-import os
+import sys
 import logging
-from logging import FileHandler, DEBUG
 import matplotlib.pyplot as plt
-# CONSTANTS
 from PIL import Image, ImageOps, ImageDraw, ImageColor, ImageFont
 from six import BytesIO
 
@@ -23,6 +21,17 @@ def numerical_sort(value):
     return parts
 
 
+def _logger_dev(logger):
+    logger.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return
+
+
+# sets location for reading asset data
 def get_file_path_prefix():
     paths = {
         "Windows": "D:/_assets",
@@ -30,16 +39,6 @@ def get_file_path_prefix():
     }
     import platform
     return paths.get(platform.system())
-
-
-class DebugFileHandler(FileHandler):
-    def __init__(self, filename, mode='a', encoding=None, delay=False):
-        super().__init__(filename, mode, encoding, delay)
-
-    def emit(self, record):
-        if not record.levelno == DEBUG:
-            return
-        super().emit(record)
 
 
 """

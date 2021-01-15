@@ -3,18 +3,19 @@ import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 from PIL import ImageOps, Image
-from tensorflow.keras.layers.experimental.preprocessing import Resizing
+from skimage.transform import resize
+from skimage.feature import hog
+from cv2.cv2 import resize
+
 from read_input_frames import load_video_frames, load_video_frames_batsman
 from util import draw_boxes, display_image
-import tensorflow as tf
-from tensorflow.keras.preprocessing import image_dataset_from_directory
-from tensorflow.keras.layers.experimental.preprocessing import RandomFlip, RandomRotation, Resizing
+import logging
 
 BLOCK = False
 
-gpus = tf.config.experimental.list_physical_devices('GPU')
 # tensorflow config
-if gpus:
+if tf.config.experimental.list_physical_devices('GPU'):
+    gpus = tf.config.experimental.list_physical_devices('GPU')
     try:
         # Currently, memory growth needs to be the same across GPUs
         for gpu in gpus:
@@ -27,9 +28,9 @@ if gpus:
 
 
 def _load_ssd_mobilenet(handle):
-    print('starting load...')
+    logging.info('starting load...')
     detector = hub.load(handle).signatures['default']
-    print('loaded: {}'.format(type(detector)))
+    logging.info('loaded: {}'.format(type(detector)))
     return detector
 
 
@@ -81,32 +82,34 @@ class BBoxLayer(tf.keras.layers.Layer):
         person_class_entities = []
         person_bounding_boxes = []
         for i, entity in enumerate(detection_class_entities):
-            if detection_class_entities[i] == b'Person':
+            print('det_score: {}'.format(detection_scores[i]))
+            if entity == b'Person' and detection_scores[i] > 0.15:
                 person_class_entities.append(detection_class_entities[i])
                 person_bounding_boxes.append(detection_boxes[i])
                 person_detection_scores.append(detection_scores[i])
 
+        # returns LIST of Tensors, shape(4,) dtype=float32 of an array
         return person_bounding_boxes
 
     def _load_ssd_mobilenet(self):
         return hub.load(self._handle).signatures['default']
 
 
-class Rescale(tf.keras.layers.Layer):
+class MatchScale(tf.keras.layers.Layer):
     def __init__(self, units=1, input_dim=()):
-        super(Rescale, self).__init__()
+        super(MatchScale, self).__init__()
 
     def call(self, image, bboxes):
         rescaled = []
-        for box in bboxes:
-            im_width, im_height, _ = image.shape
+        for box_id, box in enumerate(bboxes):
+            batch, im_height, im_width, _ = image.shape
             ymin, xmin, ymax, xmax = tuple(box)
             (left, right, bottom, top) = (
                 int(xmin * im_width),
                 int(xmax * im_width),
                 int(ymin * im_height),
                 int(ymax * im_height))
-            rescaled.append([left, right, top, bottom])
+            rescaled.append([box_id, (left, right, top, bottom)])
         return rescaled, image
 
 
@@ -114,14 +117,16 @@ class CropToSize(tf.keras.layers.Layer):
     def __init__(self, units=1, input_dim=()):
         super(CropToSize, self).__init__()
 
-    def call(self, rescaled, image):
+    def call(self, image, rescaled):
         cropped = []
-        for r in rescaled:
-            print(r)
-            (left, right, top, bottom) = r
-            cropped.append(image[bottom:top, left:right, :])
+        for i, r in enumerate(rescaled[0]):
+            print('r1:', r[1])
+            (left, right, top, bottom) = r[1]
+            print('crop_sshape', image[bottom:top, left:right, :].shape)
+            cropped.append([i, image[bottom:top, left:right, :]])
 
         print('len(cropped) : {}'.format(len(cropped)))
+        # Returns list of images with integer IDs
         return cropped
 
 
@@ -134,72 +139,57 @@ bbox_layer = BBoxLayer()
 single_frame = tf.image.convert_image_dtype(
     np.array(frames[0]), dtype=tf.float32)[tf.newaxis, ...]
 
-# returns list of Tensors containing floats of bounding box dimensions
-##  multiply by image size to obtain crop values
-##  output format ymin, xmin, ymax, max
-box = bbox_layer(single_frame)
-r = Rescale()
-r_out = r(frames[0], box)
-print('r_out: {}'.format(r_out))
-c = CropToSize()
-c_out = c(r_out[0], r_out[1])
+print('single_frame.shape: {}'.format(single_frame.shape))
+classifier = tf.keras.models.load_model('./very_small.h5')
 
-print('c_out: {}'.format(c_out))
-plt.imshow(c_out[0])
+obj_res = []
+bbox = bbox_layer(single_frame)
+
+for i in bbox:
+    print(i)
+
+print(type(bbox))
+print(bbox)
+scale_match = MatchScale()
+size_crop = CropToSize()
+
+print(single_frame.shape)
+bbox_scale_matched = scale_match(single_frame, bbox)
+objects = size_crop(single_frame[0], bbox_scale_matched)
+for i in bbox_scale_matched[0]:
+    print('i in bbox_scale_matched[0]: {}'.format(i))
+
+for num, i in enumerate(objects):
+    print('i in objects:')
+    person_id, img = i
+    # fd, img  = hog(img, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), visualize=True, multichannel=True)
+    print(img.shape)
+    print(type(img))
+    plt.subplot(3, 3, num + 1)
+    plt.imshow(img)
+    img = tf.image.convert_image_dtype(np.array(img), dtype=tf.float32)[tf.newaxis, ...]
+    img = tf.image.convert_image_dtype(np.array(img), dtype=tf.float32)[..., tf.newaxis]
+    res = classifier(img)
+    plt.title(res[0].numpy())
+    # print(res[0])
+    # plt.imshow(img.numpy())
+    #
+    # plt.show(block=SHOW_ALL_PERSONS)
+
 plt.show()
+
+# for c in c_out:
+#     batsman_tensor = classifier(c[1])
+#     batsman_id = c[0]
+#     if batsman_tensor[0] > batsman_tensor[1]:
+#         # only add boundign box if obbject is a batsman
+#         obj_res.append([batsman_id, batsman_tensor])
+#
+# # draw bbounding box per frame
+#
+# print('c_out: {}'.format(c_out))
+# plt.imshow(c_out[0])
+# plt.show()
 
 # SSD_MODULE_HANDLE = "https://tfhub.dev/google/openimages_v4/ssd/mobilenet_v2/1"
 # CAT_PATH = '/media/aadi/Library1/_assets/img/sahil_frames'
-#
-# model = tf.keras.models.load_model('./very_small.h5')
-#
-# resize = Resizing(244, 244)
-#
-#
-#
-# data_augmentation = tf.keras.Sequential([
-#     RandomFlip('horizontal'),
-#     RandomRotation(0.2),
-# ])
-#
-# # FOR MODEL.PY
-# DATA_DIR = "/media/aadi/Library1/_assets/video/sahil_categories"
-# AUTOTUNE = tf.data.AUTOTUNE
-# NUM_CLASSES = 2
-# BATCH_SIZE = 1
-# image_height = 224
-# image_width = 224
-# IMAGE_SIZE = (image_width, image_height)
-# IMAGE_SIZE_DEPTH = (image_width, image_height, 3)
-# VALIDATION_SPLIT = 0.4
-# LABEL_MODE = 'categorical'
-# COLOR_MODE = 'rgb'
-# SEED = 42
-# EPOCHS = 1
-#
-# # Model configuration
-# preprocess_input = tf.keras.applications.mobilenet_v2.preprocess_input
-# base_model = tf.keras.applications.MobileNetV2(input_shape=IMAGE_SIZE_DEPTH,
-#                                                include_top=False,
-#                                                weights='imagenet')
-# base_model.trainable = False
-#
-# resize_layer = Resizing(224, 224, name='resize')
-# global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
-# prediction_layer = tf.keras.layers.Dense(NUM_CLASSES, activation='sigmoid')
-#
-# # Model definition
-# inputs = tf.keras.Input(shape=(None, None, 3))
-# x = resize_layer(inputs)
-# x = data_augmentation(x)
-# x = preprocess_input(x)
-# x = base_model(x, training=False)
-# x = global_average_layer(x)
-# x = prediction_layer(x)
-# outputs = tf.keras.layers.Dropout(0.3)(x)
-# model = tf.keras.Model(inputs, outputs)
-#
-# base_learning_rate = 0.0001
-# model.compile(optimizer=tf.keras.optimizers.Adam(lr=base_learning_rate),
-#               loss='categorical_crossentropy',
-#               metrics=['categorical_accuracy'])

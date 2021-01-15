@@ -2,44 +2,43 @@ import os
 import tensorflow as tf
 import logging
 import gc
-import numpy as np
+import psutil
 from imageai.Detection import ObjectDetection
-from logging import info, debug, warning, error
+from logging import info, debug, error
 from os.path import join
 from time import perf_counter
 
-from util import frames_path
-from util import config_session_tf, numerical_sort, split_frame_name_ball, split_frame_name
+from util import frames_path, config_session_tf, numerical_sort, split_frame_name_ball, _logger_dev
 
+logger = logging.getLogger()
+_logger_dev(logger)
 
-# set logging level
-logging.basicConfig(level=logging.DEBUG)
 # config to allow memory growth and max GPU buffer size
 tf.compat.v1.keras.backend.set_session(config_session_tf())
 # Required for imageAI
 tf.compat.v1.disable_eager_execution()
 
 
+# Loads YOLO object detector with custom objects set to human
 def init_detector():
     detector = ObjectDetection()
     detector.setModelTypeAsYOLOv3()
     detector.setModelPath('D:/_assets/models/yolo.h5')
     detector.loadModel()
     custom_objects = detector.CustomObjects(person=True)
-
     return detector, custom_objects
 
 
 DETECT = init_detector()
 
 
+# Extracts humans, creates folder in directory of video
 def get_objects_per_frame(frame, output_path=None, detect=DETECT):
-    output_image_path = join(frames_path.split(
-        '.')[0], frame) if output_path else None
+    output_image_path = join(frames_path.split('.')[0], frame) if output_path else None
     input_image = frame
     detector, custom_objects = detect
 
-    detections, objects = detector.detectCustomObjectsFromImage(
+    detections, objects = detector.detectObjectsFromImage(
         custom_objects=custom_objects,
         input_image=input_image,
         minimum_percentage_probability=30,
@@ -49,17 +48,17 @@ def get_objects_per_frame(frame, output_path=None, detect=DETECT):
     return detections, objects
 
 
+# Extracts humans, creates folder in directory of video from frame path
 def get_objects_per_frame_path(frame, output_path=None, detect=DETECT, ):
     start = perf_counter()
-    output_image_path = join(frames_path.split(
-        '.')[0], frame) if output_path else None
+    output_image_path = join(frames_path.split('.')[0], frame) if output_path else None
     input_image_path = join(frames_path, frame)
 
     info('output_image_path: {}'.format(output_image_path))
 
     detector, custom_objects = detect
 
-    detections, objects = detector.detectCustomObjectsFromImage(
+    detections, objects = detector.detectObjectsFromImage(
         custom_objects=custom_objects,
         input_image=input_image_path,
         output_image_path=output_image_path,

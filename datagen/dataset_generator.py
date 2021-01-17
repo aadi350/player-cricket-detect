@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 
 # Parameter Inputs
-DATA_DIR = "/media/aadi/Library1/_assets/video/sahil_categories"
+DATA_DIR = "data/img/sahil_categories"
 AUTOTUNE = tf.data.AUTOTUNE
 NUM_CLASSES = 2
 BATCH_SIZE = 32
@@ -40,9 +40,6 @@ def get_data(data_dir=DATA_DIR):
     )
 
     class_names = train_ds.class_names
-    # train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
-    # val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
-
     return (train_ds, val_ds), class_names
 
 

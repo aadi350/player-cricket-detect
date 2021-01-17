@@ -8,7 +8,7 @@ from logging import info, debug, error
 from os.path import join
 from time import perf_counter
 
-from util import frames_path, config_session_tf, numerical_sort, split_frame_name_ball, _logger_dev
+from processingutils.util import frames_path, config_session_tf, numerical_sort, split_frame_name_ball, _logger_dev
 
 logger = logging.getLogger()
 _logger_dev(logger)

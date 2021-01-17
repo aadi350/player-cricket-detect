@@ -12,7 +12,7 @@ logger.debug(tf.__version__)
 numbers = re.compile(r'(\d+)')
 tf.compat.v1.disable_eager_execution()
 
-
+# utility sort function
 def numerical_sort(value):
     parts = numbers.split(value)
     parts[1::2] = map(int, parts[1::2])

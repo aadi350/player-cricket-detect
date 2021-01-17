@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageOps, ImageDraw, ImageColor, ImageFont
 from six import BytesIO
 
-frames_path = '/media/aadi/Library1/_assets/video/sahil_videos'
+frames_path = 'data/video/sahil_videos'
 
 
 # UTILITY FUNCTIONS

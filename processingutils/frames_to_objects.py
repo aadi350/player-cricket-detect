@@ -1,4 +1,6 @@
 import os
+import sys
+
 import tensorflow as tf
 import logging
 import gc
@@ -8,22 +10,26 @@ from logging import info, debug, error
 from os.path import join
 from time import perf_counter
 
-from processingutils.util import frames_path, config_session_tf, numerical_sort, split_frame_name_ball, _logger_dev
+from processingutils.util import VIDEOS_PATH, config_session_tf, numerical_sort, split_frame_name_ball, _logger_dev
+from video_to_frames import FRAMES_TARGET_PATH
 
 logger = logging.getLogger()
-_logger_dev(logger)
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 # config to allow memory growth and max GPU buffer size
 tf.compat.v1.keras.backend.set_session(config_session_tf())
 # Required for imageAI
 tf.compat.v1.disable_eager_execution()
 
+DETECTOR_MODEL_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/savedmodels/yolo.h5'
+EXTRACTED_OBJS_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_extracted_objs'
+EXTRACTED_FRAMES_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_frames'
 
 # Loads YOLO object detector with custom objects set to human
 def init_detector():
     detector = ObjectDetection()
     detector.setModelTypeAsYOLOv3()
-    detector.setModelPath('D:/_assets/models/yolo.h5')
+    detector.setModelPath(DETECTOR_MODEL_PATH)
     detector.loadModel()
     custom_objects = detector.CustomObjects(person=True)
     return detector, custom_objects
@@ -34,7 +40,8 @@ DETECT = init_detector()
 
 # Extracts humans, creates folder in directory of video
 def get_objects_per_frame(frame, output_path=None, detect=DETECT):
-    output_image_path = join(frames_path.split('.')[0], frame) if output_path else None
+    video_name = VIDEOS_PATH.split('.')[0].split('/')[-1]
+    output_image_path = join(EXTRACTED_OBJS_PATH, video_name, frame) if output_path else None
     input_image = frame
     detector, custom_objects = detect
 
@@ -51,10 +58,9 @@ def get_objects_per_frame(frame, output_path=None, detect=DETECT):
 # Extracts humans, creates folder in directory of video from frame path
 def get_objects_per_frame_path(frame, output_path=None, detect=DETECT, ):
     start = perf_counter()
-    output_image_path = join(frames_path.split('.')[0], frame) if output_path else None
-    input_image_path = join(frames_path, frame)
-
-    info('output_image_path: {}'.format(output_image_path))
+    video_name = frame.split('.')[0].split('/')[-1]
+    output_image_path = join(EXTRACTED_OBJS_PATH, video_name)
+    input_image_path = join(EXTRACTED_FRAMES_PATH, frame)
 
     detector, custom_objects = detect
 
@@ -66,7 +72,7 @@ def get_objects_per_frame_path(frame, output_path=None, detect=DETECT, ):
         extract_detected_objects=True
     )
 
-    debug('file: {}, virtual_memory().percent: {}, cpu_percent: {}, time: {}'.format(
+    logger.debug('file: {}, virtual_memory().percent: {}, cpu_percent: {}, time: {}'.format(
         os.path.basename(frame),
         psutil.virtual_memory().percent,
         psutil.cpu_percent(),
@@ -82,20 +88,21 @@ if __name__ == '__main__':
     time_taken = []
     detector, custom_objects = init_detector()
 
-    BALL_NUM_RANGE = [i for i in range(42, 43)]
+    BALL_NUM_RANGE = [i for i in range(45, 46)]
     print(BALL_NUM_RANGE)
 
-    for i, file in enumerate(sorted(os.listdir(frames_path), key=numerical_sort)):
+    for i, file in enumerate(sorted(os.listdir(FRAMES_TARGET_PATH), key=numerical_sort)):
         try:
             if split_frame_name_ball(file) in BALL_NUM_RANGE:
-                print('i: {}, file: {}'.format(i, os.fsdecode(file)))
                 try:
                     get_objects_per_frame_path(
                         os.fsdecode(file),
                         detect=(detector, custom_objects))
                 except Exception as e:
-                    error('get_objects_per_frame(): {}'.format(e))
-                    pass
+                    logger.error('get_objects_per_frame(): {}'.format(e))
+                    continue
         except TypeError as t:
-            debug(t)
+            logger.debug('TypeError: ' + str(t))
             continue
+
+

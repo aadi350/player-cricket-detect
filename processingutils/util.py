@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageOps, ImageDraw, ImageColor, ImageFont
 from six import BytesIO
 
-frames_path = 'data/video/sahil_videos'
+VIDEOS_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/video/sahil_videos'
 
 
 # UTILITY FUNCTIONS

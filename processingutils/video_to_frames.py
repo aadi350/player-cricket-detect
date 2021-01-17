@@ -13,7 +13,7 @@ numbers = re.compile(r'(\d+)')
 tf.compat.v1.disable_eager_execution()
 
 VIDEO_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/video/sahil_videos'
-TARGET_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/frames'
+FRAMES_TARGET_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_frames/'
 
 
 # utility sort function
@@ -23,7 +23,7 @@ def numerical_sort(value):
     return parts
 
 
-def extract_single_video(videopath, targetpath=TARGET_PATH):
+def extract_single_video(videopath, targetpath=FRAMES_TARGET_PATH):
     vid = cv.VideoCapture(videopath)
     video_name = (videopath.split('.')[0]).split('/')[-1]
     video_frames_path = os.path.join(targetpath, video_name)
@@ -52,10 +52,10 @@ def extract_single_video(videopath, targetpath=TARGET_PATH):
 
 
 def main():
-    if not os.path.isdir(TARGET_PATH):
+    if not os.path.isdir(FRAMES_TARGET_PATH):
         try:
             logging.debug('path not exist')
-            os.mkdir(TARGET_PATH)
+            os.mkdir(FRAMES_TARGET_PATH)
         except FileExistsError('cannot create frames folder'):
             pass
 

@@ -45,6 +45,16 @@ def get_file_path_prefix():
     Visualization code adapted from TF object detection API
 """
 
+def plot_metric(metric_train, metric_val, xlim=None, ylim=None):
+    plt.subplot(2, 1, 2)
+    plt.plot(metric_train, label='Training' + str(metric_train))
+    plt.plot(metric_train, label='Validation' + str(metric_val))
+    plt.ylim([0, 1.0])
+    plt.plot(xlim, ylim, label='Start Fine Tuning')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation' + str(metric_train))
+    plt.xlabel('epoch')
+    plt.show()
 
 def load_img(path):
     img = tf.io.read_file(path)

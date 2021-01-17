@@ -6,7 +6,6 @@ import tensorflow as tf
 from skimage.feature import hog
 from datagen.dataset_generator import get_data
 from read_input_frames import load_video_frames_batsman
-from models.mobilenet.mobilenet import get_callbacks, return_model
 
 IMG_DIRECTORY = '/media/aadi/Library1/_assets/img'
 FRAME_DIRECTORY = IMG_DIRECTORY + '/sahil_frames'
@@ -69,9 +68,6 @@ def show_mag_spectrum(block=SHOW_PLOTS):
     plt.show(block=block)
     plt.clf()
 
-# Training
-
-
 
 def lists_to_ds(train_features, train_labels):
     # Re-dataset data
@@ -109,4 +105,8 @@ def get_hog_ds(take=None):
     train_ds_hog = lists_to_ds(train_hog, train_labels)
     val_ds_hog = lists_to_ds(val_hog, val_labels)
 
+    tf.data.experimental.save(train_ds_hog,
+                              '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories/hog')
+    tf.data.experimental.save(val_ds_hog,
+                              '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories/hog')
     return train_ds_hog, val_ds_hog

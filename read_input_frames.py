@@ -7,9 +7,9 @@ from processingutils.util import numerical_sort, _logger_dev
 root = logging.getLogger()
 _logger_dev(root)
 
-CAT_PATH = 'data/img/sahil_frames'
-BATSMAN_CAT_PATH = 'data/img/sahil_categories/batsman'
-OTHERS_CAT_PATH = 'data/img/sahil_categories/others'
+CAT_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_frames'
+BATSMAN_CAT_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories/batsman'
+OTHERS_CAT_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories/others'
 
 
 # Loads only cropped images from batsman data directory

@@ -2,7 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 
 # Parameter Inputs
-DATA_DIR = "data/img/sahil_categories"
+DATA_DIR = "/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories"
 AUTOTUNE = tf.data.AUTOTUNE
 NUM_CLASSES = 2
 BATCH_SIZE = 32

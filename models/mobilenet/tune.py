@@ -9,14 +9,14 @@ from tensorboard.plugins.hparams import api as hp
 import datagen.dataset_generator as dataset_generator
 import models.mobilenet.mobilenet as mobilenet
 
-EPOCHS = 10
+EPOCHS = 1
 MODEL = 'mobilenet'
 LOGDIR = "logs/hparam_tuning/" + MODEL + '_' + datetime.now().strftime("%Y%m%d-%H%M%S") + '_'
 
 (train_gen, val_gen), class_dict = dataset_generator.get_datagen()
 # Specify discrete OR ranges of hyper-parameter intervals
 HP_NUM_UNITS = hp.HParam('num_units', hp.Discrete([16, 32]))
-HP_DROPOUT = hp.HParam('dropout', hp.RealInterval(0.1, 0.2, 0.3))
+HP_DROPOUT = hp.HParam('dropout', hp.RealInterval(0.1, 0.3))
 HP_OPTIMIZER = hp.HParam('optimizer', hp.Discrete(['adam', 'sgd']))
 
 METRIC_ACCURACY = 'accuracy'

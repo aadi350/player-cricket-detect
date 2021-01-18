@@ -32,7 +32,7 @@ def get_magnitude_spectrum(frame, channel=None):
 
 # function to return HoG
 def get_hog(frame):
-    fd, hog_image = hog(frame, orientations=8, pixels_per_cell=(16, 16),
+    fd, hog_image = hog(frame, orientations=8, pixels_per_cell=(8, 8),
                         cells_per_block=(3, 3), visualize=True, feature_vector=False, multichannel=True)
     return hog_image
 
@@ -130,3 +130,4 @@ def write_hog_from_file():
                 writepath = os.path.join(CAT_HOG_PATH, category, file)
                 cv.imwrite(writepath, hog_img)
 
+write_hog_from_file()

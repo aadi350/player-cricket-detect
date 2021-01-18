@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 # Parameter Inputs
+CAT_HOG_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/categories_hog'
 DATA_DIR = "/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories"
 AUTOTUNE = tf.data.AUTOTUNE
 NUM_CLASSES = 2
@@ -83,6 +84,11 @@ def get_datagen(data_dir=DATA_DIR):
     )
 
     return (train_gen, val_gen), train_gen.class_indices
+
+
+def get_datagen_hog(datadir=CAT_HOG_PATH):
+    return get_datagen(datadir)
+
 
 if __name__ == '__main__':
     get_data()

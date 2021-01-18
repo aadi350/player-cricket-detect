@@ -1,4 +1,6 @@
 import logging
+import os
+from PIL import Image
 import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,7 +9,9 @@ from skimage.feature import hog
 from datagen.dataset_generator import get_data
 from read_input_frames import load_video_frames_batsman
 
-IMG_DIRECTORY = '/media/aadi/Library1/_assets/img'
+IMG_DIRECTORY = '/home/aadi/PycharmProjects/player-cricket-detect/data/img'
+CAT_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories'
+CAT_HOG_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/categories_hog'
 FRAME_DIRECTORY = IMG_DIRECTORY + '/sahil_frames'
 SHOW_PLOTS = False
 
@@ -69,6 +73,7 @@ def show_mag_spectrum(block=SHOW_PLOTS):
     plt.clf()
 
 
+# Training
 def lists_to_ds(train_features, train_labels):
     # Re-dataset data
     train_ds_hog = tf.data.Dataset.from_tensor_slices((train_features, train_labels))
@@ -79,11 +84,8 @@ def lists_to_ds(train_features, train_labels):
 
 def get_hog_ds(take=None):
     (train_ds, val_ds), class_names = get_data()
-    train_ds = train_ds.unbatch()
-    val_ds = val_ds.unbatch()
-    if take:
-        train_ds = train_ds.take(take)
-        val_ds = val_ds.take(take)
+    train_ds = train_ds.unbatch().take(take)
+    val_ds = val_ds.unbatch().take(take)
 
     train_hog = []
     val_hog = []
@@ -108,8 +110,23 @@ def get_hog_ds(take=None):
     train_ds_hog = lists_to_ds(train_hog, train_labels)
     val_ds_hog = lists_to_ds(val_hog, val_labels)
 
-    tf.data.experimental.save(train_ds_hog,
-                              '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories/hog')
-    tf.data.experimental.save(val_ds_hog,
-                              '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories/hog')
     return train_ds_hog, val_ds_hog
+
+
+def boost_contrast(img, ratio=3):
+    return img * ratio
+
+
+def write_hog_from_file():
+    for category in os.listdir(CAT_PATH):
+        if not os.path.exists(os.path.join(CAT_HOG_PATH, category)):
+            os.makedirs(os.path.join(CAT_HOG_PATH, category))
+
+        for file in os.listdir(os.path.join(CAT_PATH, category)):
+            if file.endswith('jpg'):
+                abspath = os.path.join(CAT_PATH, category, file)
+                img = Image.open(abspath)
+                hog_img = boost_contrast(get_hog(img))
+                writepath = os.path.join(CAT_HOG_PATH, category, file)
+                cv.imwrite(writepath, hog_img)
+

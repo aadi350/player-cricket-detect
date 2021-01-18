@@ -79,8 +79,11 @@ def lists_to_ds(train_features, train_labels):
 
 def get_hog_ds(take=None):
     (train_ds, val_ds), class_names = get_data()
-    train_ds = train_ds.unbatch().take(take)
-    val_ds = val_ds.unbatch().take(take)
+    train_ds = train_ds.unbatch()
+    val_ds = val_ds.unbatch()
+    if take:
+        train_ds = train_ds.take(take)
+        val_ds = val_ds.take(take)
 
     train_hog = []
     val_hog = []

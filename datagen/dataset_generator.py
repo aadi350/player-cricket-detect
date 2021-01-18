@@ -1,9 +1,15 @@
+import os
+import numpy as np
 import tensorflow as tf
+from PIL import Image
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 # Parameter Inputs
 CAT_HOG_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/categories_hog'
+
 DATA_DIR = "/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories"
+DATA_CAT_BATSMAN = os.path.join(DATA_DIR, 'batsman')
+DATA_CAT_OTHERS = os.path.join(DATA_DIR, 'others')
 AUTOTUNE = tf.data.AUTOTUNE
 NUM_CLASSES = 2
 BATCH_SIZE = 32
@@ -17,15 +23,15 @@ COLOR_MODE = 'rgb'
 SEED = 42
 
 
-def get_data(data_dir=DATA_DIR):
+def get_data(data_dir=DATA_DIR, batch=BATCH_SIZE, labelmode=LABEL_MODE):
     train_ds = image_dataset_from_directory(
         data_dir,
         color_mode=COLOR_MODE,
         validation_split=VALIDATION_SPLIT,
         subset='training',
         image_size=IMAGE_SIZE,
-        batch_size=BATCH_SIZE,
-        label_mode=LABEL_MODE,
+        batch_size=batch,
+        label_mode=labelmode,
         seed=SEED
     )
 
@@ -35,13 +41,14 @@ def get_data(data_dir=DATA_DIR):
         validation_split=VALIDATION_SPLIT,
         subset='validation',
         image_size=IMAGE_SIZE,
-        batch_size=BATCH_SIZE,
-        label_mode=LABEL_MODE,
+        batch_size=batch,
+        label_mode=labelmode,
         seed=SEED
     )
 
     class_names = train_ds.class_names
     return (train_ds, val_ds), class_names
+
 
 def get_datagen(data_dir=DATA_DIR):
     datagen = ImageDataGenerator(rescale=1. / 255,
@@ -86,7 +93,7 @@ def get_datagen(data_dir=DATA_DIR):
     return (train_gen, val_gen), train_gen.class_indices
 
 
-def get_datagen_hog(datadir=CAT_HOG_PATH):
+def get_data_hog(datadir=CAT_HOG_PATH):
     return get_datagen(datadir)
 
 

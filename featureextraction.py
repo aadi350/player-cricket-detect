@@ -30,6 +30,10 @@ def get_magnitude_spectrum(frame, channel=None):
     return magnitude_spectrum
 
 
+def get_hog_vector(frame):
+    fd = hog(frame, orientations=8, pixels_per_cell=(4, 4), cells_per_block=(3, 3), visualize=False, feature_vector=True, multichannel=True)
+
+    return fd
 # function to return HoG
 def get_hog(frame):
     fd, hog_image = hog(frame, orientations=8, pixels_per_cell=(8, 8),
@@ -82,10 +86,14 @@ def lists_to_ds(train_features, train_labels):
     return train_ds_hog
 
 
-def get_hog_ds(take=None):
+def get_hog_ds(take=None, typelist=True):
     (train_ds, val_ds), class_names = get_data()
-    train_ds = train_ds.unbatch().take(take)
-    val_ds = val_ds.unbatch().take(take)
+    if take is not None:
+        train_ds = train_ds.unbatch().take(take)
+        val_ds = val_ds.unbatch().take(take)
+    else:
+        train_ds = train_ds.unbatch()
+        val_ds = val_ds.unbatch()
 
     train_hog = []
     val_hog = []
@@ -96,38 +104,21 @@ def get_hog_ds(take=None):
     # Feature calculation for dataset
     for i, item in enumerate(train_ds):
         train_labels.append(item[1])
-        hog_img = get_hog(np.array(item[0] / 255))
+        hog_img = get_hog_vector(np.array(item[0] / 255))
         hog_img = cv.merge((hog_img, hog_img, hog_img))
         train_hog.append(hog_img)
 
-    print("\n\nvalidation\n")
+    print("validation\n")
     for i, item in enumerate(val_ds):
         val_labels.append(item[1])
-        hog_img = get_hog(np.array(item[0] / 255))
+        hog_img = get_hog_vector(np.array(item[0] / 255))
         hog_img = cv.merge((hog_img, hog_img, hog_img))
         val_hog.append(hog_img)
+
+    if typelist:
+        return train_hog, train_labels, val_hog, val_labels
 
     train_ds_hog = lists_to_ds(train_hog, train_labels)
     val_ds_hog = lists_to_ds(val_hog, val_labels)
 
     return train_ds_hog, val_ds_hog
-
-
-def boost_contrast(img, ratio=3):
-    return img * ratio
-
-
-def write_hog_from_file():
-    for category in os.listdir(CAT_PATH):
-        if not os.path.exists(os.path.join(CAT_HOG_PATH, category)):
-            os.makedirs(os.path.join(CAT_HOG_PATH, category))
-
-        for file in os.listdir(os.path.join(CAT_PATH, category)):
-            if file.endswith('jpg'):
-                abspath = os.path.join(CAT_PATH, category, file)
-                img = Image.open(abspath)
-                hog_img = boost_contrast(get_hog(img))
-                writepath = os.path.join(CAT_HOG_PATH, category, file)
-                cv.imwrite(writepath, hog_img)
-
-write_hog_from_file()

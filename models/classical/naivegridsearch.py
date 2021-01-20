@@ -2,8 +2,10 @@ import os
 import pickle
 
 from skimage.feature import hog
-
-from sklearn.metrics import classification_report,accuracy_score
+from sklearn.experimental import enable_halving_search_cv  # noqa
+# now you can import normally from model_selection
+from sklearn.model_selection import HalvingGridSearchCV
+from sklearn.metrics import classification_report, accuracy_score
 from sklearn.decomposition import IncrementalPCA, PCA
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
@@ -31,7 +33,7 @@ hog_features = []
 img_labels = []
 labels = []
 
-for file in os.listdir(DATA_CAT_BATSMAN)[:1000]:
+for file in os.listdir(DATA_CAT_BATSMAN)[:10]:
     file_path = os.path.join(DATA_CAT_BATSMAN, file)
     image = skimage.io.imread(file_path)
     image = color.rgb2gray(image)
@@ -49,7 +51,7 @@ for file in os.listdir(DATA_CAT_BATSMAN)[:1000]:
     hog_images.append(hog_image)
     hog_features.append(fd)
 
-for file in os.listdir(DATA_CAT_OTHERS)[:1000]:
+for file in os.listdir(DATA_CAT_OTHERS)[:10]:
     file_path = os.path.join(DATA_CAT_OTHERS, file)
     image = skimage.io.imread(file_path)
     image = color.rgb2gray(image)
@@ -86,11 +88,19 @@ X_train_pca = pca.transform(X_train)
 X_test_pca = pca.transform(X_test)
 param_grid = {'C': [1e3, 5e3, 1e4, 5e4, 1e5],
               'gamma': [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.1], }
+
+# TODO
+# clf = HalvingGridSearchCV(
+#     SVC(kernel='rbf', class_weight='balanced')
+# )
+
 clf = GridSearchCV(
     SVC(kernel='rbf', class_weight='balanced'), param_grid
 )
 
 # clf = clf.fit(X_train_pca, y_train)
+print(clf.param_grid)
+print(clf.best_params_)
 MLPClassifier(random_state=1, learning_rate='invscaling', max_iter=500, solver='sgd', verbose=True).fit(X_train_pca, y_train)
 y_pred = clf.predict(X_test_pca)
 print("Accuracy: "+str(accuracy_score(y_test, y_pred)))

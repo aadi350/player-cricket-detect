@@ -3,10 +3,9 @@ import pickle
 
 from skimage.feature import hog
 from sklearn.experimental import enable_halving_search_cv  # noqa
-# now you can import normally from model_selection
 from sklearn.model_selection import HalvingGridSearchCV
 from sklearn.metrics import classification_report, accuracy_score
-from sklearn.decomposition import IncrementalPCA, PCA
+from sklearn.decomposition import PCA
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV

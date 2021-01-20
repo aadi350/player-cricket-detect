@@ -6,7 +6,6 @@ import logging
 import gc
 import psutil
 from imageai.Detection import ObjectDetection
-from logging import info, debug, error
 from os.path import join
 from time import perf_counter
 
@@ -25,11 +24,16 @@ DETECTOR_MODEL_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/sav
 EXTRACTED_OBJS_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_extracted_objs'
 EXTRACTED_FRAMES_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_frames'
 
-# Loads YOLO object detector with custom objects set to human
-def init_detector():
+
+def init_detector(detector_model_path=DETECTOR_MODEL_PATH):
+    """
+    Configures YOLOv3 object detector for people detection and returns detector with custom_objects
+    :param detector_model_path: path to .h5 model
+    :return: ImageAI object detector
+    """
     detector = ObjectDetection()
     detector.setModelTypeAsYOLOv3()
-    detector.setModelPath(DETECTOR_MODEL_PATH)
+    detector.setModelPath(detector_model_path)
     detector.loadModel()
     custom_objects = detector.CustomObjects(person=True)
     return detector, custom_objects
@@ -38,25 +42,35 @@ def init_detector():
 DETECT = init_detector()
 
 
-# Extracts humans, creates folder in directory of video
-def get_objects_per_frame(frame, output_path=None, detect=DETECT):
-    video_name = VIDEOS_PATH.split('.')[0].split('/')[-1]
-    output_image_path = join(EXTRACTED_OBJS_PATH, video_name, frame) if output_path else None
-    input_image = frame
-    detector, custom_objects = detect
+# def get_objects_per_frame(frame, output_path=None, detect=DETECT):
+#     """
+#     :param frame: Input image frame (single)
+#     :param output_path: folder to hold folder of detected objects (persons)
+#     :param detect: object detector model
+#     :return: detections and objects
+#     """
+#     video_name = VIDEOS_PATH.split('.')[0].split('/')[-1]
+#     output_image_path = join(EXTRACTED_OBJS_PATH, video_name, frame) if output_path else None
+#     input_image = frame
+#     detector, custom_objects = detect
+#
+#     detections, objects = detector.detectObjectsFromImage(
+#         custom_objects=custom_objects,
+#         input_image=input_image,
+#         minimum_percentage_probability=30,
+#         extract_detected_objects=False
+#     )
+#
+#     return detections, objects
 
-    detections, objects = detector.detectObjectsFromImage(
-        custom_objects=custom_objects,
-        input_image=input_image,
-        minimum_percentage_probability=30,
-        extract_detected_objects=False
-    )
 
-    return detections, objects
-
-
-# Extracts humans, creates folder in directory of video from frame path
 def get_objects_per_frame_path(frame, output_path=None, detect=DETECT, ):
+    """Extracts objects from frame and outputs cropped images into folder
+    :param frame: input frame to perform object detection on
+    :param output_path: path to hold folder of extracted output objects
+    :param detect: object detector
+    :return: detections and objects as list
+    """
     start = perf_counter()
     video_name = frame.split('.')[0].split('/')[-1]
     output_image_path = join(EXTRACTED_OBJS_PATH, video_name)

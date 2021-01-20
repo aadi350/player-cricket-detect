@@ -1,3 +1,7 @@
+"""
+TODO
+Remove get_file_path_prefix
+"""
 import tempfile
 from urllib.request import urlopen
 import numpy as np
@@ -12,7 +16,6 @@ from six import BytesIO
 VIDEOS_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/video/sahil_videos'
 
 
-# UTILITY FUNCTIONS
 def numerical_sort(value):
     # sort by numerical part of file name
     numbers = re.compile(r'(\d+)')
@@ -22,6 +25,9 @@ def numerical_sort(value):
 
 
 def _logger_dev(logger):
+    """Configures logger to output time and level through stdout
+    :param logger: file logging object
+    """
     logger.setLevel(logging.DEBUG)
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(logging.DEBUG)
@@ -31,7 +37,6 @@ def _logger_dev(logger):
     return
 
 
-# sets location for reading asset data
 def get_file_path_prefix():
     paths = {
         "Windows": "D:/_assets",
@@ -45,7 +50,13 @@ def get_file_path_prefix():
     Visualization code adapted from TF object detection API
 """
 
+
 def plot_metric(metric_train, metric_val, xlim=None, ylim=None):
+    """
+    :param metric_train: training metric from history object
+    :param metric_val: validation metric from history object
+    :param xlim, ylim: size of output plot
+    """
     plt.subplot(2, 1, 2)
     plt.plot(metric_train, label='Training' + str(metric_train))
     plt.plot(metric_train, label='Validation' + str(metric_val))
@@ -56,20 +67,34 @@ def plot_metric(metric_train, metric_val, xlim=None, ylim=None):
     plt.xlabel('epoch')
     plt.show()
 
+
 def load_img(path):
+    """
+    :param path: absolute file path for image file
+    :return: jpeg decoded
+    """
     img = tf.io.read_file(path)
     img = tf.image.decode_jpeg(img, channels=3)
     return img
 
 
 def display_image(image):
-    fig = plt.figure(figsize=(20, 15))
+    """shows single image
+    :param image: JPEG decoded file
+    """
+    plt.figure(figsize=(20, 15))
     plt.grid(False)
     plt.imshow(image)
     plt.show()
 
 
 def download_and_resize_image(url, new_width=256, new_height=256, display=False):
+    """Downloads image file from remote address, resizes image and returns file path
+    :param url: remote path to image
+    :param new_width, new_height: dimensions to which image is resized
+    :param display: boolean to plt.show() image
+    :return: filepath of image (string)
+    """
     _, filename = tempfile.mkstemp(suffix=".jpg")
     response = urlopen(url)
     image_data = response.read()
@@ -175,6 +200,10 @@ def split_frame_name(filename):
 
 
 def split_frame_name_ball(filename):
+    """
+    :param filename: filename of image
+    :return: filename without extension
+    """
     return split_frame_name(filename)[0]
 
 

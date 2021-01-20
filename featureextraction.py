@@ -1,6 +1,4 @@
 import logging
-import os
-from PIL import Image
 import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,6 +17,11 @@ frames, _ = load_video_frames_batsman(num_frames=10)
 
 
 def get_magnitude_spectrum(frame, channel=None):
+    """
+    :param frame: input frame
+    :param channel: selected color channel to perform fourier transform
+    :return: vector of magnitude spectrum
+    """
     if channel:
         frame = frame[:, :, channel]
     else:
@@ -31,23 +34,39 @@ def get_magnitude_spectrum(frame, channel=None):
 
 
 def get_hog_vector(frame):
+    """
+    :param frame: input image
+    :return: feature vector of HoG
+    """
     fd = hog(frame, orientations=8, pixels_per_cell=(4, 4), cells_per_block=(3, 3), visualize=False, feature_vector=True, multichannel=True)
 
     return fd
-# function to return HoG
+
+
 def get_hog(frame):
+    """
+    :param frame: input image
+    :return: 2D array of Histogram of Oriented Gradients Image
+    """
     fd, hog_image = hog(frame, orientations=8, pixels_per_cell=(8, 8),
                         cells_per_block=(3, 3), visualize=True, feature_vector=False, multichannel=True)
     return hog_image
 
 
 def merge_hog(hog_img):
+    """
+    :param hog_img: image frame
+    :return: 3-channel image
+    """
     return cv.merge((hog_img, hog_img, hog_img))
 
 
 # FOR VISUALISATION ONLY
 # Plots feature description for 10 frames
 def show_hog(block=SHOW_PLOTS):
+    """Exists purely to show 10 HoG of frames
+    :param block: boolean which prevents loop from executing for visualising hogs
+    """
     for i, frame in enumerate(frames[:10]):
         if i == 6: i = 11
         if i > 20: break
@@ -62,6 +81,9 @@ def show_hog(block=SHOW_PLOTS):
 
 
 def show_mag_spectrum(block=SHOW_PLOTS):
+    """Exists purely to show 10 magnitude spectra of frames
+    :param block: boolean which prevents loop from executing for visualising hogs
+    """
     i = 1
     for frame in frames[:10]:
         if i == 6: i = 11
@@ -77,9 +99,12 @@ def show_mag_spectrum(block=SHOW_PLOTS):
     plt.clf()
 
 
-# Training
 def lists_to_ds(train_features, train_labels):
-    # Re-dataset data
+    """
+    :param train_features: list of training feature vectors
+    :param train_labels: list of training labels
+    :return: Keras dataset object batched
+    """
     train_ds_hog = tf.data.Dataset.from_tensor_slices((train_features, train_labels))
     train_ds_hog = train_ds_hog.batch(16)
     logging.info('len(train_labels): {}, len(train_features): {}'.format(len(train_labels), len(train_features)))
@@ -87,6 +112,11 @@ def lists_to_ds(train_features, train_labels):
 
 
 def get_hog_ds(take=None, typelist=True):
+    """
+    :param take: number of samples to return from dataset
+    :param typelist: boolean if True returns list instead of TensorFlow dataset
+    :return: training and validation hog vectors with one-hot labels
+    """
     (train_ds, val_ds), class_names = get_data()
     if take is not None:
         train_ds = train_ds.unbatch().take(take)
@@ -95,11 +125,8 @@ def get_hog_ds(take=None, typelist=True):
         train_ds = train_ds.unbatch()
         val_ds = val_ds.unbatch()
 
-    train_hog = []
-    val_hog = []
-
-    train_labels = []
-    val_labels = []
+    train_hog, val_hog = [], []
+    train_labels, val_labels = [], []
 
     # Feature calculation for dataset
     for i, item in enumerate(train_ds):

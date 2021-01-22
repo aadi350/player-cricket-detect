@@ -16,7 +16,7 @@ from skimage import color
 import numpy as np
 
 
-DATA_DIR = "/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories"
+DATA_DIR = "/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories"
 DATA_CAT_BATSMAN = os.path.join(DATA_DIR, 'batsman')
 DATA_CAT_OTHERS = os.path.join(DATA_DIR, 'others')
 
@@ -81,7 +81,7 @@ X_train, X_test = df[:partition, :-1], df[partition:, :-1]
 y_train, y_test = df[:partition, -1:].ravel(), df[partition:, -1:].ravel()
 
 
-pca = PCA(n_components=150, svd_solver='randomized',whiten=True).fit(X_train)
+pca = PCA(n_components=3, svd_solver='randomized',whiten=True).fit(X_train)
 
 X_train_pca = pca.transform(X_train)
 X_test_pca = pca.transform(X_test)
@@ -97,9 +97,8 @@ clf = GridSearchCV(
     SVC(kernel='rbf', class_weight='balanced'), param_grid
 )
 
-# clf = clf.fit(X_train_pca, y_train)
+clf = clf.fit(X_train_pca, y_train)
 print(clf.param_grid)
-print(clf.best_params_)
 MLPClassifier(random_state=1, learning_rate='invscaling', max_iter=500, solver='sgd', verbose=True).fit(X_train_pca, y_train)
 y_pred = clf.predict(X_test_pca)
 print("Accuracy: "+str(accuracy_score(y_test, y_pred)))
@@ -113,3 +112,7 @@ loaded_model = pickle.load(open(filename, 'rb'))
 result = loaded_model.score(X_test_pca, y_test)
 
 print(loaded_model.predict([X_test[0]]))
+
+from tensorflow.keras.losses import cosine_similarity, Los
+
+loss = cosine_similarity()

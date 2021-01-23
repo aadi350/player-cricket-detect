@@ -1,10 +1,13 @@
+import os
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image_dataset_from_directory
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # Parameter Inputs
-from tensorflow.python.keras.preprocessing.image import ImageDataGenerator
-
-DATA_DIR = "/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories"
+CAT_HOG_PATH = '/home/aadidev/projects/player-cricket-detect/data/img/categories_hog'
+DATA_DIR = "/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories"
+DATA_CAT_BATSMAN = os.path.join(DATA_DIR, 'batsman')
+DATA_CAT_OTHERS = os.path.join(DATA_DIR, 'others')
 AUTOTUNE = tf.data.AUTOTUNE
 NUM_CLASSES = 2
 BATCH_SIZE = 32
@@ -18,15 +21,28 @@ COLOR_MODE = 'rgb'
 SEED = 42
 
 
-def get_data(data_dir=DATA_DIR):
+def get_data(data_dir=DATA_DIR, batch=BATCH_SIZE, labelmode=LABEL_MODE):
+    '''One-hot encodes categories of input images, placing them
+    into training and validation classes, accessed via dataset objects
+    :param data_dir: contains all files in n folders corresponding to n classes
+    :param batch: batch size
+    :param labelmode: 'categorical' or None
+    :return: train and validation datasets with class names
+    NB: No augmentation performed
+    :param data_dir:
+    :param batch:
+    :param labelmode:
+    :return:
+    '''
+
     train_ds = image_dataset_from_directory(
         data_dir,
         color_mode=COLOR_MODE,
         validation_split=VALIDATION_SPLIT,
         subset='training',
         image_size=IMAGE_SIZE,
-        batch_size=BATCH_SIZE,
-        label_mode=LABEL_MODE,
+        batch_size=batch,
+        label_mode=labelmode,
         seed=SEED
     )
 
@@ -36,15 +52,21 @@ def get_data(data_dir=DATA_DIR):
         validation_split=VALIDATION_SPLIT,
         subset='validation',
         image_size=IMAGE_SIZE,
-        batch_size=BATCH_SIZE,
-        label_mode=LABEL_MODE,
+        batch_size=batch,
+        label_mode=labelmode,
         seed=SEED
     )
 
     class_names = train_ds.class_names
     return (train_ds, val_ds), class_names
 
+
 def get_datagen(data_dir=DATA_DIR):
+    """Function augments and one-hot encodes categories of input images, placing them
+    into training and validation classes, accessed via datagenerators
+    :param data_dir: contains all files in n folders corresponding to n classes
+    :return: train and validaiton Keras datagenerator objects with class indices
+    """
     datagen = ImageDataGenerator(rescale=1. / 255,
                                        shear_range=0.2,
                                        zoom_range=0.2,
@@ -86,5 +108,10 @@ def get_datagen(data_dir=DATA_DIR):
 
     return (train_gen, val_gen), train_gen.class_indices
 
+
+def get_data_hog(datadir=CAT_HOG_PATH):
+    return get_datagen(datadir)
+
+
 if __name__ == '__main__':
-    get_data()
+    print(get_data().__doc__)

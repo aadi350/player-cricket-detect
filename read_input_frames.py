@@ -7,9 +7,9 @@ from processingutils.util import numerical_sort, _logger_dev
 root = logging.getLogger()
 _logger_dev(root)
 
-CAT_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_frames'
-BATSMAN_CAT_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories/batsman'
-OTHERS_CAT_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories/others'
+CAT_PATH = '/home/aadidev/projects/player-cricket-detect/data/img/sahil_frames'
+BATSMAN_CAT_PATH = '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/batsman'
+OTHERS_CAT_PATH = '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/others'
 
 
 def load_video_frames_batsman(path=BATSMAN_CAT_PATH, num_frames=None):

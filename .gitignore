@@ -12,3 +12,5 @@ __pycache__/*
 .idea/*
 .idea/vcs.xml
 /data/
+*.ipynb
+ImageNetLabels.txt

@@ -4,8 +4,8 @@ from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 # Parameter Inputs
-CAT_HOG_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/categories_hog'
-DATA_DIR = "/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories"
+CAT_HOG_PATH = '/home/aadidev/projects/player-cricket-detect/data/img/categories_hog'
+DATA_DIR = "/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories"
 DATA_CAT_BATSMAN = os.path.join(DATA_DIR, 'batsman')
 DATA_CAT_OTHERS = os.path.join(DATA_DIR, 'others')
 AUTOTUNE = tf.data.AUTOTUNE
@@ -29,7 +29,6 @@ def get_data(data_dir=DATA_DIR, batch=BATCH_SIZE, labelmode=LABEL_MODE):
     :param labelmode: 'categorical' or None
     :return: train and validation datasets with class names
     NB: No augmentation performed
-
     :param data_dir:
     :param batch:
     :param labelmode:
@@ -65,7 +64,6 @@ def get_data(data_dir=DATA_DIR, batch=BATCH_SIZE, labelmode=LABEL_MODE):
 def get_datagen(data_dir=DATA_DIR):
     """Function augments and one-hot encodes categories of input images, placing them
     into training and validation classes, accessed via datagenerators
-
     :param data_dir: contains all files in n folders corresponding to n classes
     :return: train and validaiton Keras datagenerator objects with class indices
     """
@@ -117,4 +115,3 @@ def get_data_hog(datadir=CAT_HOG_PATH):
 
 if __name__ == '__main__':
     print(get_data().__doc__)
-

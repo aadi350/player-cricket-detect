@@ -7,9 +7,9 @@ from skimage.feature import hog
 from datagen.dataset_generator import get_data
 from read_input_frames import load_video_frames_batsman
 
-IMG_DIRECTORY = '/home/aadi/PycharmProjects/player-cricket-detect/data/img'
-CAT_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/sahil_categories'
-CAT_HOG_PATH = '/home/aadi/PycharmProjects/player-cricket-detect/data/img/categories_hog'
+IMG_DIRECTORY = '/home/aadidev/projects/player-cricket-detect/data/img'
+CAT_PATH = '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories'
+CAT_HOG_PATH = '/aadidev/projects/player-cricket-detect/data/img/categories_hog'
 FRAME_DIRECTORY = IMG_DIRECTORY + '/sahil_frames'
 SHOW_PLOTS = False
 

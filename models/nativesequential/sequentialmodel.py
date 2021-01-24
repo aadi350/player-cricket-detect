@@ -20,8 +20,6 @@ def cos_loss(y_true, y_pred):
     return tf.math.reduce_sum(y_true * y_pred, axis=-1)
 
 
-
-
 sgd_warm_restart = SGD(
     learning_rate=CosineDecayRestarts(0.05, 10)
 )

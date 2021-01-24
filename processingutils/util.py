@@ -116,8 +116,8 @@ def draw_bounding_box_on_image(image,
                        fill=color)
         draw.text((left + margin, text_bottom - text_height - margin),
                   display_str,
-                  fill="black",
-                  font=font)
+                  fill="black",)
+                  #font=font)
         text_bottom -= text_height - 2 * margin
 
 

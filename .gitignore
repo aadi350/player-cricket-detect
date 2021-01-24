@@ -12,4 +12,8 @@ __pycache__/*
 .idea/*
 .idea/vcs.xml
 /data/
-/models/mobilenet/logs/
+/models/resnet/logs/
+*.ipynb
+ImageNetLabels.txt
+*/.ipynb_checkpoints
+/.ipynb_checkpoints/

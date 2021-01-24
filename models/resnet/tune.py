@@ -7,11 +7,11 @@ import tensorflow as tf
 from tensorboard.plugins.hparams import api as hp
 
 import datagen.dataset_generator as dataset_generator
-import models.mobilenet.mobilenet as mobilenet
+import models.resnet.model as mobilenet
 
 EPOCHS = 1
-MODEL = 'mobilenet'
-LOGDIR = "logs/hparam_tuning/mobilenet"
+MODEL = 'resnet'
+LOGDIR = "logs/hparam_tuning/resnet"
 
 (train_gen, val_gen), class_dict = dataset_generator.get_datagen()
 # Specify discrete OR ranges of hyper-parameter intervals
@@ -24,7 +24,7 @@ METRIC_ACCURACY = 'accuracy'
 
 # Harness for setting up model for each configuration
 def train_test_model(hparams, train_data, val_data):
-    model, _ = mobilenet.build_model(hparams)
+    model = mobilenet.build_model(hparams)
     model.compile(
         optimizer=hparams['HP_OPTIMIZER'],
         loss='categorical_crossentropy',

@@ -1,17 +1,17 @@
 """
     This file provides an end-to end evaluation pipeline for a frame
 """
+from random import randint
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
-from PIL import ImageOps, Image
 from skimage import color
 
-from featureextraction import get_hog
+from processingutils.featureextraction import get_hog
 from read_input_frames import load_video_frames
-from processingutils.util import draw_boxes, display_image
 import logging
 
 matplotlib.use('TkAgg')
@@ -132,8 +132,8 @@ class BBoxLayer(tf.keras.layers.Layer):
 
 	def _load_ssd_mobilenet(self):
 		"""
-            Loads mobilenet from Tensorflow Hub
-            :return: mobilenet bbox model
+            Loads resnet from Tensorflow Hub
+            :return: resnet bbox model
         """
 		return hub.load(self._handle).signatures['default']
 
@@ -191,8 +191,10 @@ bbox_layer = BBoxLayer()
 scale_match = MatchScale()
 size_crop = CropToSize()
 
+
+
 single_frame = tf.image.convert_image_dtype(
-	np.array(frames[0]), dtype=tf.float32)[tf.newaxis, ...]
+	np.array(frames[randint(0, 9)]), dtype=tf.float32)[tf.newaxis, ...]
 
 print('single_frame.shape: {}'.format(single_frame.shape))
 
@@ -214,7 +216,7 @@ for num, i in enumerate(objects):
 	img = tf.image.convert_image_dtype(np.array(img), dtype=tf.float32)[tf.newaxis, ...]
 	img = np.resize(img, (1, 192, 192, 3))
 	img_gray = color.rgb2gray(img)
-	res = get_classification(img) #mobilenet
+	res = get_classification(img) #resnet
 	# TODO implement native sequential
 	print('res: ', res)
 	plt.title(res)

@@ -39,7 +39,7 @@ def classify_batch(img_arr, clf: SVC = None, ipca: IncrementalPCA = None) -> Non
         plt.subplot(4, 3, i+1)
         plt.imshow(image_original)
         plt.title(CATEGORY_DICT[res])
-
+    plt.savefig('batchclassify_20210126.jpg')
     plt.show()
 
 

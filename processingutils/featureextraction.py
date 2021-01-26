@@ -2,6 +2,7 @@ import logging
 import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
+import skimage
 import tensorflow as tf
 from skimage.feature import hog
 from datagen.dataset_generator import get_data
@@ -38,9 +39,15 @@ def get_hog_vector(frame):
     :param frame: input image
     :return: feature vector of HoG
     """
-    fd = hog(frame, orientations=8, pixels_per_cell=(4, 4), cells_per_block=(3, 3), visualize=False, feature_vector=True, multichannel=True)
+    if type(frame) is str:
+        frame = skimage.io.imread(frame)
+    fd = hog(frame, orientations=8, pixels_per_cell=(4, 4), cells_per_block=(3, 3), visualize=False,
+             feature_vector=True, multichannel=True)
 
     return fd
+
+
+
 
 
 def get_hog(frame):

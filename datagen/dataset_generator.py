@@ -1,5 +1,10 @@
 import os
+
+import skimage
 import tensorflow as tf
+from skimage import color
+import numpy as np
+import pandas as pd
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -107,6 +112,35 @@ def get_datagen(data_dir=DATA_DIR):
     )
 
     return (train_gen, val_gen), train_gen.class_indices
+
+
+
+def get_raw_img(datadir=DATA_DIR, num=1000):
+    labels = []
+    img_names = []
+    images = []
+    for file in os.listdir(DATA_CAT_BATSMAN)[:num]:
+        file_path = os.path.join(DATA_CAT_BATSMAN, file)
+        image = skimage.io.imread(file_path)
+        image = color.rgb2gray(image)
+        image = skimage.transform.resize(image, (224, 224), anti_aliasing=True)
+        images.append(image)
+        labels.append([1, 0])
+        del image
+
+    for file in os.listdir(DATA_CAT_OTHERS)[:num]:
+        file_path = os.path.join(DATA_CAT_OTHERS, file)
+        image = skimage.io.imread(file_path)
+        image = color.rgb2gray(image)
+        image = skimage.transform.resize(image, (224, 224), anti_aliasing=True)
+        images.append(image)
+        labels.append([0, 1])
+        del image
+
+    df = np.hstack((images, labels))
+    images_df = pd.DataFrame(df)
+
+    return images_df
 
 
 def get_data_hog(datadir=CAT_HOG_PATH):

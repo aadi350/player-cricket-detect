@@ -5,6 +5,9 @@ from skimage import color
 from skimage.feature import hog
 from sklearn.decomposition import IncrementalPCA
 import numpy
+from skimage.metrics import peak_signal_noise_ratio
+from sklearn.metrics import classification_report
+
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 
@@ -21,13 +24,19 @@ def _load_pca(ipca: IncrementalPCA = None) -> IncrementalPCA:
     return ipca
 
 
-def _load_clf(clf: object = _CLF_PATH) -> object:
-    if clf is None:
-        clf = pickle.load(open(_CLF_PATH, 'rb'))
-    return clf
+def _load_clf(clf: str = _CLF_PATH) -> object:
+    return pickle.load(open(clf, 'rb'))
 
 
-def classify_batch(img_arr, clf: SVC = None, ipca: IncrementalPCA = None) -> None:
+def eval_clf(arr, labels, clf: object = _CLF_PATH, ipca: IncrementalPCA = None) -> None:
+    clf = _load_clf()
+    ipca = _load_pca(ipca)
+    res = clf.predict(arr)
+    return classification_report(labels, res)
+
+
+def classify_batch(img_arr, clf: SVC = None, ipca: IncrementalPCA = None, visualise: bool=False
+                   ) -> None:
     assert len(img_arr) <= 12 #TODO update for multiple
     clf = _load_clf(clf)
     ipca = _load_pca(ipca)
@@ -40,7 +49,7 @@ def classify_batch(img_arr, clf: SVC = None, ipca: IncrementalPCA = None) -> Non
         plt.imshow(image_original)
         plt.title(CATEGORY_DICT[res])
     plt.savefig('batchclassify_20210126.jpg')
-    plt.show()
+    plt.show(block=(not visualise))
 
 
 def _get_hog(img) -> numpy.array:

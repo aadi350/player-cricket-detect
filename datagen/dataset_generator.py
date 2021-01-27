@@ -27,7 +27,7 @@ SEED = 42
 
 
 def get_data(data_dir=DATA_DIR, batch=BATCH_SIZE, labelmode=LABEL_MODE):
-    '''One-hot encodes categories of input images, placing them
+    """One-hot encodes categories of input images, placing them
     into training and validation classes, accessed via dataset objects
     :param data_dir: contains all files in n folders corresponding to n classes
     :param batch: batch size
@@ -38,7 +38,7 @@ def get_data(data_dir=DATA_DIR, batch=BATCH_SIZE, labelmode=LABEL_MODE):
     :param batch:
     :param labelmode:
     :return:
-    '''
+    """
 
     train_ds = image_dataset_from_directory(
         data_dir,

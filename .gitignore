@@ -20,3 +20,6 @@ ImageNetLabels.txt
 *.pkl
 hog_features
 *.csv
+/others_hog_sum
+/sum_hog
+/batsman_hog_sum

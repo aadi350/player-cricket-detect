@@ -1,6 +1,8 @@
 import os
 
+import cv2
 import skimage
+from skimage import io, transform
 import tensorflow as tf
 from skimage import color
 import numpy as np
@@ -114,31 +116,30 @@ def get_datagen(data_dir=DATA_DIR):
     return (train_gen, val_gen), train_gen.class_indices
 
 
-
 def get_raw_img(datadir=DATA_DIR, num=1000):
     labels = []
     img_names = []
     images = []
     for file in os.listdir(DATA_CAT_BATSMAN)[:num]:
         file_path = os.path.join(DATA_CAT_BATSMAN, file)
-        image = skimage.io.imread(file_path)
-        image = color.rgb2gray(image)
-        image = skimage.transform.resize(image, (224, 224), anti_aliasing=True)
+        image = io.imread(file_path)
+        image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
+        image = transform.resize(image, (224, 224), anti_aliasing=True)
         images.append(image)
-        labels.append([1, 0])
+        labels.append(1)
         del image
 
     for file in os.listdir(DATA_CAT_OTHERS)[:num]:
         file_path = os.path.join(DATA_CAT_OTHERS, file)
-        image = skimage.io.imread(file_path)
-        image = color.rgb2gray(image)
-        image = skimage.transform.resize(image, (224, 224), anti_aliasing=True)
+        image = io.imread(file_path)
+        image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
+        image = transform.resize(image, (224, 224), anti_aliasing=True)
         images.append(image)
-        labels.append([0, 1])
+        labels.append(0)
         del image
 
-    df = np.hstack((images, labels))
-    images_df = pd.DataFrame(df)
+    data = dict({'images': images, 'labels': labels})
+    images_df = pd.DataFrame(data)
 
     return images_df
 

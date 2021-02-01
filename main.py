@@ -224,10 +224,8 @@ X_train, X_test, y_train, y_test = split_data(data)
 from processingutils.wavelettransform import waves
 
 print(waves)
-i = 0
 for wave in waves:
 
-    i+=1
     # SPECIFY TYPE OF TRANSFORM
     X_train, X_test, y_train, y_test = split_data(data)
     X_train = transform_array_hist(X_train, wavelet=wave)
@@ -237,31 +235,3 @@ for wave in waves:
     logging.info(str('SVC: ' + wave) + str(cross_val_score(clf, X_train, y_train).mean())
                  )
     plot_learning_curve(clf, str('SVC: ' + wave), X_train, y_train)
-
-    if i > 2: break
-
-
-quit()
-# clf.fit(np.array(X_train, dtype=object), y_train)
-
-y_pred = clf.predict(X_test)
-print(y_pred)
-print(classification_report(y_test, y_pred, zero_division=False))
-# print(precision_recall_curve(y_test, y_pred))
-quit()
-
-from models.svc import classify
-
-file_paths = [
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/batsman/Ball0001_Inn1_11.jpg',
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/others/Ball0001_Inn1_17.jpg',
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/batsman/Ball0001_Inn1_18.jpg',
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/batsman/Ball0001_Inn1_103.jpg',
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/batsman/Ball0001_Inn1_139.jpg',
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/batsman/Ball0002_Inn2_133.jpg',
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/others/Ball0002_Inn2_193.jpg',
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/others/Ball0002_Inn2_381.jpg',
-    '/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories/others/Ball0003_Inn1_125.jpg',
-]
-
-classify.classify_batch(file_paths, visualise=True)

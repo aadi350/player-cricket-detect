@@ -153,6 +153,11 @@ def transform_array(frames):
     return approx
 
 
+def transform_array_hist(frames, wavelet: str = 'bior3.9'):
+    histarray = [hist_single(frame, return_bins=False, show=False, wavelet=wavelet) for frame in frames]
+    return histarray
+
+
 def vis_array(frames):
     vis_frame = [_visualise_single(frame) for frame in frames]
     return vis_frame

@@ -1,20 +1,30 @@
-import os
-import plotly.express as px
-import pandas
-import pandas as pd
+import logging
+
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas
 from plotly import graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn import svm
-from sklearn.linear_model import SGDClassifier
-from sklearn.preprocessing import MultiLabelBinarizer
+from sklearn.metrics import classification_report
+from sklearn.model_selection import learning_curve, cross_val_score
 
 from datagen import dataset_generator
-from processingutils.wavelettransform import transform_array, vis_array
+from processingutils.wavelettransform import vis_array, transform_array_hist
 
-DATA_DIR = "/home/aadidev/projects/player-cricket-detect/data/img/sahil_categories"
-DATA_CAT_BATSMAN = os.path.join(DATA_DIR, 'batsman')[:10]
-DATA_CAT_OTHERS = os.path.join(DATA_DIR, 'others')[:10]
+# Gets or creates a logger
+logger = logging.getLogger(__name__)
+
+# set log level
+logger.setLevel(logging.INFO)
+
+# define file handler and set formatter
+file_handler = logging.FileHandler('logfile.log')
+formatter = logging.Formatter('%(asctime)s : %(message)s')
+file_handler.setFormatter(formatter)
+
+# add file handler to logger
+logger.addHandler(file_handler)
 
 batsman, batsman_fname, batsman_labels = [], [], []
 others, others_fname, others_labels = [], [], []
@@ -22,14 +32,12 @@ others, others_fname, others_labels = [], [], []
 CATEGORY_DICT = {0: 'batsman', 1: 'others'}
 NUM_FILES = 10
 
-data = dataset_generator.get_raw_img(num=10)
+data = dataset_generator.get_raw_img()
+from sklearn.utils import shuffle
 
-import matplotlib.pyplot as plt
+data = shuffle(data)
 
 
-
-
-# everything works up to here
 def show_single_type_wavelet(show=False):
     '''
     :param show: boolean whether or not to show wavelet decomposition for 6 frames
@@ -59,18 +67,144 @@ def show_single_type_wavelet(show=False):
     fig.show()
     return None
 
+
 show_single_type_wavelet(False)
 
 images = np.array(data['images'])
 labels = np.array(data['labels'])
 
-single_frame = images[0]
 from processingutils.wavelettransform import hist_single, hist
-hist_single(single_frame, show=True)
-count = hist(images, show=True)
-# everything works up to here
 
-quit()
+single_frame = images[0]
+hist_single(single_frame, show=False)
+count = hist(images, show=False)
+
+
+def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
+    """
+    Generate 3 plots: the test and training learning curve, the training
+    samples vs fit times curve, the fit times vs score curve.
+
+    Parameters
+    ----------
+    estimator : estimator instance
+        An estimator instance implementing `fit` and `predict` methods which
+        will be cloned for each validation.
+
+    title : str
+        Title for the chart.
+
+    X : array-like of shape (n_samples, n_features)
+        Training vector, where ``n_samples`` is the number of samples and
+        ``n_features`` is the number of features.
+
+    y : array-like of shape (n_samples) or (n_samples, n_features)
+        Target relative to ``X`` for classification or regression;
+        None for unsupervised learning.
+
+    axes : array-like of shape (3,), default=None
+        Axes to use for plotting the curves.
+
+    ylim : tuple of shape (2,), default=None
+        Defines minimum and maximum y-values plotted, e.g. (ymin, ymax).
+
+    cv : int, cross-validation generator or an iterable, default=None
+        Determines the cross-validation splitting strategy.
+        Possible inputs for cv are:
+
+          - None, to use the default 5-fold cross-validation,
+          - integer, to specify the number of folds.
+          - :term:`CV splitter`,
+          - An iterable yielding (train, test) splits as arrays of indices.
+
+        For integer/None inputs, if ``y`` is binary or multiclass,
+        :class:`StratifiedKFold` used. If the estimator is not a classifier
+        or if ``y`` is neither binary nor multiclass, :class:`KFold` is used.
+
+        Refer :ref:`User Guide <cross_validation>` for the various
+        cross-validators that can be used here.
+
+    n_jobs : int or None, default=None
+        Number of jobs to run in parallel.
+        ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
+        ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
+        for more details.
+
+    train_sizes : array-like of shape (n_ticks,)
+        Relative or absolute numbers of training examples that will be used to
+        generate the learning curve. If the ``dtype`` is float, it is regarded
+        as a fraction of the maximum size of the training set (that is
+        determined by the selected validation method), i.e. it has to be within
+        (0, 1]. Otherwise it is interpreted as absolute sizes of the training
+        sets. Note that for classification the number of samples usually have
+        to be big enough to contain at least one sample from each class.
+        (default: np.linspace(0.1, 1.0, 5))
+    """
+    if axes is None:
+        _, axes = plt.subplots(1, 3, figsize=(20, 5))
+
+    axes[0].set_title(title)
+    if ylim is not None:
+        axes[0].set_ylim(*ylim)
+    axes[0].set_xlabel("Training examples")
+    axes[0].set_ylabel("Score")
+
+    train_sizes, train_scores, test_scores, fit_times, _ = \
+        learning_curve(estimator, X, y, cv=cv, n_jobs=n_jobs,
+                       train_sizes=train_sizes,
+                       return_times=True)
+
+    train_scores_var = np.var(train_scores, axis=1)
+    test_scores_var = np.var(test_scores, axis=1)
+
+    train_scores_std_avg = np.sqrt(train_scores_var.mean())
+    test_scores_std_avg = np.sqrt(test_scores_var.mean())
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    fit_times_mean = np.mean(fit_times, axis=1)
+    fit_times_std = np.std(fit_times, axis=1)
+    logger.info(
+
+        f'{title} '
+        f'train_size: {train_sizes}, train_scores_mean: {train_scores_mean.mean()}, test_scores_mean: {test_scores_mean.mean()}, '
+        f'train_scores_std: {train_scores_std_avg}, test_scores_var: {test_scores_std_avg} '
+    )
+    # Plot learning curve
+    axes[0].grid()
+    axes[0].fill_between(train_sizes, train_scores_mean - train_scores_std,
+                         train_scores_mean + train_scores_std, alpha=0.1,
+                         color="r")
+    axes[0].fill_between(train_sizes, test_scores_mean - test_scores_std,
+                         test_scores_mean + test_scores_std, alpha=0.1,
+                         color="g")
+    axes[0].plot(train_sizes, train_scores_mean, 'o-', color="r",
+                 label="Training score")
+    axes[0].plot(train_sizes, test_scores_mean, 'o-', color="g",
+                 label="Cross-validation score")
+    axes[0].legend(loc="best")
+
+    # Plot n_samples vs fit_times
+    axes[1].grid()
+    axes[1].plot(train_sizes, fit_times_mean, 'o-')
+    axes[1].fill_between(train_sizes, fit_times_mean - fit_times_std,
+                         fit_times_mean + fit_times_std, alpha=0.1)
+    axes[1].set_xlabel("Training examples")
+    axes[1].set_ylabel("fit_times")
+    axes[1].set_title("Scalability of the model")
+
+    # Plot fit_time vs score
+    axes[2].grid()
+    axes[2].plot(fit_times_mean, test_scores_mean, 'o-')
+    axes[2].fill_between(fit_times_mean, test_scores_mean - test_scores_std,
+                         test_scores_mean + test_scores_std, alpha=0.1)
+    axes[2].set_xlabel("fit_times")
+    axes[2].set_ylabel("Score")
+    axes[2].set_title("Performance of the model")
+    plt.savefig(title + '.jpg')
+    return plt
 
 
 def split_data(data: pandas.DataFrame, ratio=0.7):
@@ -84,24 +218,37 @@ def split_data(data: pandas.DataFrame, ratio=0.7):
     return X_train, X_test, y_train, y_test
 
 
+# ITERATION BEGINS
 X_train, X_test, y_train, y_test = split_data(data)
 
+from processingutils.wavelettransform import waves
+
+print(waves)
+i = 0
+for wave in waves:
+
+    i+=1
+    # SPECIFY TYPE OF TRANSFORM
+    X_train, X_test, y_train, y_test = split_data(data)
+    X_train = transform_array_hist(X_train, wavelet=wave)
+    X_test = transform_array_hist(X_test, wavelet=wave)
+
+    clf = svm.SVC(random_state=42, kernel='rbf', max_iter=1000, tol=1e-3, probability=False)
+    logging.info(str('SVC: ' + wave) + str(cross_val_score(clf, X_train, y_train).mean())
+                 )
+    plot_learning_curve(clf, str('SVC: ' + wave), X_train, y_train)
+
+    if i > 2: break
 
 
 quit()
+# clf.fit(np.array(X_train, dtype=object), y_train)
 
-X_train = transform_array(X_train)
-X_test = transform_array(X_test)
-
-mlb = MultiLabelBinarizer()
-y_train = mlb.fit_transform(y_train)
-print(y_train)
-print(np.array(X_train).shape)
-
-sgd_clf = svm.SVC(random_state=42, max_iter=1000, tol=1e-3)
-sgd_clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+print(y_pred)
+print(classification_report(y_test, y_pred, zero_division=False))
+# print(precision_recall_curve(y_test, y_pred))
 quit()
-
 
 from models.svc import classify
 

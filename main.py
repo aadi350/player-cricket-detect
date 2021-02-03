@@ -76,8 +76,9 @@ labels = np.array(data['labels'])
 from processingutils.wavelettransform import hist_single, hist
 
 single_frame = images[0]
-hist_single(single_frame, show=False)
-count = hist(images, show=False)
+hist_single(single_frame, show=True)
+count = hist(images, show=True)
+quit()
 
 
 def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,
@@ -225,7 +226,6 @@ from processingutils.wavelettransform import waves
 
 print(waves)
 for wave in waves:
-
     # SPECIFY TYPE OF TRANSFORM
     X_train, X_test, y_train, y_test = split_data(data)
     X_train = transform_array_hist(X_train, wavelet=wave)

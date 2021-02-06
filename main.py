@@ -5,11 +5,10 @@ import numpy as np
 import pandas
 from plotly import graph_objects as go
 from plotly.subplots import make_subplots
-from sklearn import svm
-from sklearn.metrics import classification_report
 from sklearn.model_selection import learning_curve
 
 from datagen import dataset_generator
+from processingutils.orbmatching import ORBExtractor
 
 # Gets or creates a logger
 logger = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ others, others_fname, others_labels = [], [], []
 CATEGORY_DICT = {0: 'batsman', 1: 'others'}
 NUM_FILES = 10
 
-data = dataset_generator.get_raw_img()
+data = dataset_generator.get_raw_img(grey=False)
 from sklearn.utils import shuffle
 
 data = shuffle(data)
@@ -213,3 +212,8 @@ def split_data(data: pandas.DataFrame, ratio=0.7):
 
 X_train, X_test, y_train, y_test = split_data(data)
 # Data prep complete at this point
+
+orb = ORBExtractor(nfeatures=150)
+
+orb.orb_array(X_train[:15], show=True)
+

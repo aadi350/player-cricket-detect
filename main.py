@@ -7,10 +7,9 @@ from plotly import graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn import svm
 from sklearn.metrics import classification_report
-from sklearn.model_selection import learning_curve, cross_val_score
+from sklearn.model_selection import learning_curve
 
 from datagen import dataset_generator
-from processingutils.wavelettransform import vis_array, transform_array_hist
 
 # Gets or creates a logger
 logger = logging.getLogger(__name__)
@@ -38,13 +37,14 @@ from sklearn.utils import shuffle
 data = shuffle(data)
 
 
-def show_single_type_wavelet(show=False):
+def show_single(show=False):
+    raise NotImplementedError('#TODO Implement ORB Feature')
     '''
     :param show: boolean whether or not to show wavelet decomposition for 6 frames
     :return: None
     '''
     if not show: return None
-    vis = vis_array(X_train)
+    vis = None
     ROWS = 2
     COLS = 3
 
@@ -68,19 +68,11 @@ def show_single_type_wavelet(show=False):
     return None
 
 
-show_single_type_wavelet(False)
-
 images = np.array(data['images'])
 labels = np.array(data['labels'])
 
-from processingutils.wavelettransform import hist_single, hist
 
-single_frame = images[0]
-hist_single(single_frame, show=True)
-count = hist(images, show=True)
-quit()
-
-
+# feature-agnostic
 def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,
                         n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
     """
@@ -219,19 +211,5 @@ def split_data(data: pandas.DataFrame, ratio=0.7):
     return X_train, X_test, y_train, y_test
 
 
-# ITERATION BEGINS
 X_train, X_test, y_train, y_test = split_data(data)
-
-from processingutils.wavelettransform import waves
-
-print(waves)
-for wave in waves:
-    # SPECIFY TYPE OF TRANSFORM
-    X_train, X_test, y_train, y_test = split_data(data)
-    X_train = transform_array_hist(X_train, wavelet=wave)
-    X_test = transform_array_hist(X_test, wavelet=wave)
-
-    clf = svm.SVC(random_state=42, kernel='rbf', max_iter=1000, tol=1e-3, probability=False)
-    logging.info(str('SVC: ' + wave) + str(cross_val_score(clf, X_train, y_train).mean())
-                 )
-    plot_learning_curve(clf, str('SVC: ' + wave), X_train, y_train)
+# Data prep complete at this point

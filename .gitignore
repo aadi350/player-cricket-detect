@@ -14,7 +14,6 @@ __pycache__/*
 /data/
 *.ipynb
 ImageNetLabels.txt
-*.jpg
 *.sav
 *.h5
 *.pkl

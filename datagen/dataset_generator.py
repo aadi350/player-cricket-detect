@@ -1,12 +1,10 @@
 import os
 
 import cv2
-import skimage
-from skimage import io, transform
-import tensorflow as tf
-from skimage import color
 import numpy as np
 import pandas as pd
+import tensorflow as tf
+from skimage import transform
 from tensorflow.keras.preprocessing import image_dataset_from_directory
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -116,14 +114,14 @@ def get_datagen(data_dir=DATA_DIR):
     return (train_gen, val_gen), train_gen.class_indices
 
 
-def get_raw_img(datadir=DATA_DIR, num=1000):
+def get_raw_img(datadir=DATA_DIR, num=1000, grey=True):
     labels = []
     img_names = []
     images = []
     for file in os.listdir(DATA_CAT_BATSMAN)[:num]:
         file_path = os.path.join(DATA_CAT_BATSMAN, file)
-        image = io.imread(file_path)
-        image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
+        image = cv2.imread(file_path)
+        if grey: image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
         image = transform.resize(image, (224, 224), anti_aliasing=True)
         images.append(image)
         labels.append(1)
@@ -131,8 +129,8 @@ def get_raw_img(datadir=DATA_DIR, num=1000):
 
     for file in os.listdir(DATA_CAT_OTHERS)[:num]:
         file_path = os.path.join(DATA_CAT_OTHERS, file)
-        image = io.imread(file_path)
-        image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
+        image = cv2.imread(file_path)
+        if grey: image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2GRAY)
         image = transform.resize(image, (224, 224), anti_aliasing=True)
         images.append(image)
         labels.append(0)

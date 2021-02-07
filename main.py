@@ -78,7 +78,6 @@ from processingutils.wavelettransform import hist_single, hist
 single_frame = images[0]
 hist_single(single_frame, show=True)
 count = hist(images, show=True)
-quit()
 
 
 def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,

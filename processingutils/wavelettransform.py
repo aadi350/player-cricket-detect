@@ -29,9 +29,9 @@ bior_3 = [
 ]
 
 waves = []
-waves.extend(bior_1)
-waves.extend(bior_2)
-waves.extend(bior_3)
+wave_fam = pywt.wavelist(kind='discrete')
+for fam in wave_fam:
+    waves.append(fam)
 
 
 def _normalise(frame, min: int = 0, max: int = 255):
@@ -70,7 +70,7 @@ def _transform_single(frame, wavelet: str = 'bior3.9', mode: str = 'sym', level:
     :return: list in the form
         [cAn, (cHn, cVn, cDn), … (cH1, cV1, cD1)]
     """
-    wavelet = pywt.Wavelet(wavelet)
+    # wavelet = pywt.ContinuousWavelet(wavelet)
     arr = pywt.wavedec2(np.array(frame), wavelet, mode='periodization', level=level)
     arr[0] /= np.abs(arr[0]).max()
     for detail_level in range(level):
